@@ -154,7 +154,7 @@ func calcSourceAmount(sourceCurrency string, targetCurrency string, targetAmount
 	currentTargetAmount := targetCurrencyData.Amount
 	remainder := math.Mod(currentTargetAmount, riseFactor)
 
-	if remainder > 0 {
+	if remainder > 0 && (targetAmount-remainder) > 0 {
 		targetAmount = targetAmount - remainder
 		sourceAmount = sourceAmount + (remainder * rate)
 		rate = rate + (rate * riseRate)
@@ -217,7 +217,7 @@ func purchaseHandler(c *fiber.Ctx) error {
 	return c.JSON(&fiber.Map{"data": actualTargetAmount})
 }
 
-func calcAmountHandler(c *fiber.Ctx) error {
+func calcAmountsHandler(c *fiber.Ctx) error {
 	query := new(CalcAmountQuery)
 	if err := c.QueryParser(query); err != nil {
 		return err
@@ -236,7 +236,7 @@ func calcAmountHandler(c *fiber.Ctx) error {
 	return c.JSON(&fiber.Map{"data": (amountResult)})
 }
 
-func getExchangeRateHandler(c *fiber.Ctx) error {
+func getExchangeRatesHandler(c *fiber.Ctx) error {
 	var rate float64 = 0
 	query := new(CalcAmountQuery)
 	if err := c.QueryParser(query); err != nil {
@@ -266,6 +266,18 @@ func getHistoryLogsHandler(c *fiber.Ctx) error {
 	// limit := query.Limit
 	// sort := query.Sort
 	return c.JSON(&fiber.Map{"data": []HistoryLog(historyLogs)})
+}
+
+func getCurrenciesHandler(c *fiber.Ctx) error {
+	currencyName := c.Params("name")
+	var currencyData Currency
+	for _, currency := range currencies {
+		if currency.Name == currencyName {
+			currencyData = currency
+			break
+		}
+	}
+	return c.JSON(&fiber.Map{"data": Currency(currencyData)})
 }
 
 func main() {
@@ -302,19 +314,9 @@ func main() {
 	historyLogs = []HistoryLog{}
 	app := fiber.New()
 
-	app.Get("/currencies/:name", func(c *fiber.Ctx) error {
-		currencyName := c.Params("name")
-		var currencyData Currency
-		for _, currency := range currencies {
-			if currency.Name == currencyName {
-				currencyData = currency
-				break
-			}
-		}
-		return c.JSON(&fiber.Map{"data": Currency(currencyData)})
-	})
-	app.Get("/amounts", calcAmountHandler)
-	app.Get("/rates", getExchangeRateHandler)
+	app.Get("/currencies/:name", getCurrenciesHandler)
+	app.Get("/amounts", calcAmountsHandler)
+	app.Get("/rates", getExchangeRatesHandler)
 	app.Get("/logs", getHistoryLogsHandler)
 	app.Post("/purchases", purchaseHandler)
 
