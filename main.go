@@ -12,6 +12,7 @@ type CalcAmountQuery struct {
 	Source string  `query:"source"`
 	Target string  `query:"target"`
 	Amount float64 `query:"amount"`
+	Type   string  `query:"type"`
 }
 
 type GetExchangeRateQuery struct {
@@ -87,10 +88,6 @@ func calcTargetAmount(sourceCurrency string, targetCurrency string, sourceAmount
 			rate = exchangeRate.Rate
 			break
 		}
-		if exchangeRate.Source == targetCurrency && exchangeRate.Target == sourceCurrency {
-			rate = 1 / exchangeRate.Rate
-			break
-		}
 	}
 
 	var targetCurrencyData Currency
@@ -111,7 +108,7 @@ func calcTargetAmount(sourceCurrency string, targetCurrency string, sourceAmount
 
 	if remainder > 0 {
 		sourceAmount = sourceAmount - (rate * remainder)
-		if sourceAmount >= 0 {
+		if sourceAmount > 0 {
 			targetAmount = remainder
 		} else {
 			targetAmount = (permanentSourceAmount / rate)
@@ -133,14 +130,53 @@ func calcTargetAmount(sourceCurrency string, targetCurrency string, sourceAmount
 	return targetAmount, rate
 }
 
+func calcSourceAmount(sourceCurrency string, targetCurrency string, targetAmount float64) (float64, float64) {
+	var rate float64 = 0
+	for _, exchangeRate := range exchangeRates {
+		if exchangeRate.Source == sourceCurrency && exchangeRate.Target == targetCurrency {
+			rate = exchangeRate.Rate
+			break
+		}
+	}
+
+	var targetCurrencyData Currency
+
+	for _, currency := range currencies {
+		if currency.Name == targetCurrency {
+			targetCurrencyData = currency
+			break
+		}
+	}
+
+	var sourceAmount float64 = 0
+	riseRate := targetCurrencyData.RiseRate
+	riseFactor := targetCurrencyData.RiseFactor
+	currentTargetAmount := targetCurrencyData.Amount
+	remainder := math.Mod(currentTargetAmount, riseFactor)
+
+	if remainder > 0 {
+		targetAmount = targetAmount - remainder
+		sourceAmount = sourceAmount + (remainder * rate)
+		rate = rate + (rate * riseRate)
+	}
+
+	for targetAmount > 0 {
+		if targetAmount < riseFactor {
+			sourceAmount = sourceAmount + (targetAmount * rate)
+			break
+		}
+		targetAmount = targetAmount - riseFactor
+		sourceAmount = sourceAmount + (riseFactor * rate)
+		rate = rate + (rate * riseRate)
+	}
+
+	return sourceAmount, rate
+}
+
 func adjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount float64, newRate float64) {
 	for i, exchangeRate := range exchangeRates {
 		if exchangeRate.Source == sourceCurrency && exchangeRate.Target == targetCurrency {
 			exchangeRates[i].Rate = newRate
-			break
-		}
-		if exchangeRate.Source == targetCurrency && exchangeRate.Target == sourceCurrency {
-			exchangeRates[i].Rate = 1 / newRate
 			break
 		}
 	}
@@ -188,9 +224,16 @@ func calcAmountHandler(c *fiber.Ctx) error {
 	}
 	sourceCurrency := query.Source
 	targetCurrency := query.Target
-	sourceAmount := query.Amount
-	targetAmount, _ := calcTargetAmount(sourceCurrency, targetCurrency, sourceAmount)
-	return c.JSON(&fiber.Map{"data": (targetAmount)})
+	amountVal := query.Amount
+	amountType := query.Type
+
+	var amountResult float64 = 0
+	if amountType == "target" {
+		amountResult, _ = calcTargetAmount(sourceCurrency, targetCurrency, amountVal)
+	} else if amountType == "source" {
+		amountResult, _ = calcSourceAmount(sourceCurrency, targetCurrency, amountVal)
+	}
+	return c.JSON(&fiber.Map{"data": (amountResult)})
 }
 
 func getExchangeRateHandler(c *fiber.Ctx) error {
@@ -259,8 +302,19 @@ func main() {
 	historyLogs = []HistoryLog{}
 	app := fiber.New()
 
-	app.Get("/calc-amount", calcAmountHandler)
-	app.Get("/exchange-rates", getExchangeRateHandler)
+	app.Get("/currencies/:name", func(c *fiber.Ctx) error {
+		currencyName := c.Params("name")
+		var currencyData Currency
+		for _, currency := range currencies {
+			if currency.Name == currencyName {
+				currencyData = currency
+				break
+			}
+		}
+		return c.JSON(&fiber.Map{"data": Currency(currencyData)})
+	})
+	app.Get("/amounts", calcAmountHandler)
+	app.Get("/rates", getExchangeRateHandler)
 	app.Get("/logs", getHistoryLogsHandler)
 	app.Post("/purchases", purchaseHandler)
 
