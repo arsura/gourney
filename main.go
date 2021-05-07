@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type CalcAmountQuery struct {
@@ -173,7 +174,32 @@ func calcSourceAmount(sourceCurrency string, targetCurrency string, targetAmount
 	return sourceAmount, rate
 }
 
-func adjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount float64, newRate float64) {
+func adjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount float64, temp float64) {
+	var newCurrencyData Currency
+	var prevCurrencyAmount float64 = 0
+	for i, currency := range currencies {
+		if currency.Name == targetCurrency {
+			prevCurrencyAmount = currencies[i].Amount
+			currencies[i].Amount -= decreaseAmount
+			newCurrencyData = currencies[i]
+			break
+		}
+	}
+
+	var currentRate float64 = 0
+	for i, exchangeRate := range exchangeRates {
+		if exchangeRate.Source == sourceCurrency && exchangeRate.Target == targetCurrency {
+			currentRate = exchangeRates[i].Rate
+			break
+		}
+	}
+
+	var newRate float64 = currentRate
+	riseCurrencyRateTimes := ((math.Ceil(prevCurrencyAmount/10) * 10) - (math.Ceil(newCurrencyData.Amount/10) * 10)) / newCurrencyData.RiseFactor
+	for i := 0; i < int(riseCurrencyRateTimes); i++ {
+		newRate = newRate + (newRate * newCurrencyData.RiseRate)
+	}
+
 	for i, exchangeRate := range exchangeRates {
 		if exchangeRate.Source == sourceCurrency && exchangeRate.Target == targetCurrency {
 			exchangeRates[i].Rate = newRate
@@ -181,12 +207,6 @@ func adjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount
 		}
 	}
 
-	for i, currency := range currencies {
-		if currency.Name == targetCurrency {
-			currencies[i].Amount -= decreaseAmount
-			break
-		}
-	}
 	return
 }
 
@@ -237,13 +257,13 @@ func calcAmountsHandler(c *fiber.Ctx) error {
 }
 
 func getExchangeRatesHandler(c *fiber.Ctx) error {
-	var rate float64 = 0
 	query := new(CalcAmountQuery)
 	if err := c.QueryParser(query); err != nil {
 		return err
 	}
 	sourceCurrency := query.Source
 	targetCurrency := query.Target
+	var rate float64 = 0
 	for _, exchangeRate := range exchangeRates {
 		if exchangeRate.Source == sourceCurrency && exchangeRate.Target == targetCurrency {
 			rate = exchangeRate.Rate
@@ -314,6 +334,7 @@ func main() {
 	historyLogs = []HistoryLog{}
 	app := fiber.New()
 
+	app.Use(cors.New())
 	app.Get("/currencies/:name", getCurrenciesHandler)
 	app.Get("/amounts", calcAmountsHandler)
 	app.Get("/rates", getExchangeRatesHandler)
