@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  moonbase-service:
+    build: .
+    container_name: moonbase-service
+    image: moonbase-service
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+
+networks:
+  default:
+    external:
+      name: moonbase-network
