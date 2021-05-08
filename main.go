@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"math"
+	"sort"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -82,7 +83,7 @@ func updateHistoryLog(clientId string, source string, sourceAmount float64, targ
 		)
 }
 
-func calcTargetAmount(sourceCurrency string, targetCurrency string, sourceAmount float64) (float64, float64) {
+func calcTargetAmount(sourceCurrency string, targetCurrency string, sourceAmount float64) float64 {
 	var rate float64 = 0
 	for _, exchangeRate := range exchangeRates {
 		if exchangeRate.Source == sourceCurrency && exchangeRate.Target == targetCurrency {
@@ -128,10 +129,10 @@ func calcTargetAmount(sourceCurrency string, targetCurrency string, sourceAmount
 		}
 	}
 
-	return targetAmount, rate
+	return targetAmount
 }
 
-func calcSourceAmount(sourceCurrency string, targetCurrency string, targetAmount float64) (float64, float64) {
+func calcSourceAmount(sourceCurrency string, targetCurrency string, targetAmount float64) float64 {
 	var rate float64 = 0
 	for _, exchangeRate := range exchangeRates {
 		if exchangeRate.Source == sourceCurrency && exchangeRate.Target == targetCurrency {
@@ -171,10 +172,10 @@ func calcSourceAmount(sourceCurrency string, targetCurrency string, targetAmount
 		rate = rate + (rate * riseRate)
 	}
 
-	return sourceAmount, rate
+	return sourceAmount
 }
 
-func adjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount float64, temp float64) {
+func adjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount float64) float64 {
 	var newCurrencyData Currency
 	var prevCurrencyAmount float64 = 0
 	for i, currency := range currencies {
@@ -207,7 +208,7 @@ func adjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount
 		}
 	}
 
-	return
+	return newRate
 }
 
 func calcToleranceBound(slippageTolerance float64, expectedTargetAmount float64) (float64, float64) {
@@ -228,11 +229,11 @@ func purchaseHandler(c *fiber.Ctx) error {
 	slippageTolerance := purchaseData.SlippageTolerance
 	clientId := purchaseData.ClientId
 	lowerBound, upperBound := calcToleranceBound(slippageTolerance, expectedTargetAmount)
-	actualTargetAmount, newRate := calcTargetAmount(sourceCurrency, targetCurrency, sourceAmount)
+	actualTargetAmount := calcTargetAmount(sourceCurrency, targetCurrency, sourceAmount)
 	if actualTargetAmount < lowerBound || actualTargetAmount > upperBound {
 		return fiber.ErrBadRequest
 	}
-	adjustCurrency(sourceCurrency, targetCurrency, actualTargetAmount, newRate)
+	newRate := adjustCurrency(sourceCurrency, targetCurrency, actualTargetAmount)
 	updateHistoryLog(clientId, sourceCurrency, sourceAmount, targetCurrency, actualTargetAmount, newRate)
 	return c.JSON(&fiber.Map{"data": actualTargetAmount})
 }
@@ -249,9 +250,9 @@ func calcAmountsHandler(c *fiber.Ctx) error {
 
 	var amountResult float64 = 0
 	if amountType == "target" {
-		amountResult, _ = calcTargetAmount(sourceCurrency, targetCurrency, amountVal)
+		amountResult = calcTargetAmount(sourceCurrency, targetCurrency, amountVal)
 	} else if amountType == "source" {
-		amountResult, _ = calcSourceAmount(sourceCurrency, targetCurrency, amountVal)
+		amountResult = calcSourceAmount(sourceCurrency, targetCurrency, amountVal)
 	}
 	return c.JSON(&fiber.Map{"data": (amountResult)})
 }
@@ -280,12 +281,14 @@ func getHistoryLogsHandler(c *fiber.Ctx) error {
 	if err := c.QueryParser(query); err != nil {
 		return err
 	}
-	// sourceCurrency := query.Source
-	// targetCurrency := query.Target
-	// skip := query.Skip
-	// limit := query.Limit
-	// sort := query.Sort
-	return c.JSON(&fiber.Map{"data": []HistoryLog(historyLogs)})
+	sortedField := query.Sort
+	sortedHistoryLogs := historyLogs
+	if sortedField == "createdAt.dsc" {
+		sort.SliceStable(sortedHistoryLogs, func(i, j int) bool {
+			return sortedHistoryLogs[i].CreatedAt.After(sortedHistoryLogs[j].CreatedAt)
+		})
+	}
+	return c.JSON(&fiber.Map{"data": []HistoryLog(sortedHistoryLogs)})
 }
 
 func getCurrenciesHandler(c *fiber.Ctx) error {
