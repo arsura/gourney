@@ -32,7 +32,10 @@ func PurchaseHandler(c *fiber.Ctx) error {
 	if actualTargetAmount < lowerBound || actualTargetAmount > upperBound {
 		return fiber.ErrBadRequest
 	}
-	newRate := AdjustCurrency(sourceCurrency, targetCurrency, actualTargetAmount)
+	newRate, err := AdjustCurrency(sourceCurrency, targetCurrency, actualTargetAmount)
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
 	fakedatabase.UpdateHistoryLog(clientId, sourceCurrency, sourceAmount, targetCurrency, actualTargetAmount, newRate)
 	return c.JSON(&fiber.Map{"data": actualTargetAmount})
 }
@@ -52,11 +55,14 @@ func CalcNewCurencyRate(currentRate float64, prevCurrencyData fakedatabase.Curre
 	return newRate
 }
 
-func AdjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount float64) float64 {
+func AdjustCurrency(sourceCurrency string, targetCurrency string, decreaseAmount float64) (float64, error) {
 	prevCurrencyData := fakedatabase.FindCurrencyByName(targetCurrency)
 	currentRate := fakedatabase.FindExchangeRate(sourceCurrency, targetCurrency)
-	newCurrencyData := fakedatabase.DecreaseCurrencyAmount(targetCurrency, decreaseAmount)
+	newCurrencyData, err := fakedatabase.DecreaseCurrencyAmount(targetCurrency, decreaseAmount)
+	if err != nil {
+		return 0, err
+	}
 	newRate := CalcNewCurencyRate(currentRate, prevCurrencyData, newCurrencyData)
 	fakedatabase.UpdateExchangeRate(sourceCurrency, targetCurrency, newRate)
-	return newRate
+	return newRate, nil
 }

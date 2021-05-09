@@ -1,5 +1,7 @@
 package fakedatabase
 
+import "errors"
+
 type Currency struct {
 	Name       string
 	Amount     float64
@@ -36,14 +38,17 @@ func FindCurrencyByName(name string) Currency {
 	return currencyData
 }
 
-func DecreaseCurrencyAmount(name string, decreaseVal float64) Currency {
+func DecreaseCurrencyAmount(name string, decreaseVal float64) (Currency, error) {
 	var currencyData Currency
 	for i, currency := range Currencies {
 		if currency.Name == name {
+			if (Currencies[i].Amount - decreaseVal) < 0 {
+				return currencyData, errors.New("")
+			}
 			Currencies[i].Amount -= decreaseVal
 			currencyData = Currencies[i]
 			break
 		}
 	}
-	return currencyData
+	return currencyData, nil
 }
