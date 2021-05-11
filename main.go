@@ -14,7 +14,6 @@ func main() {
 	app.Use(cors.New())
 	currencies.Controller(app)
 	histories.Controller(app)
-
 	if err := app.Listen(":8080"); err != nil {
 		log.Fatal(err)
 	}
