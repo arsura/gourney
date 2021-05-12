@@ -9,7 +9,7 @@ services:
     image: moonbase-service
     restart: unless-stopped
     environment: 
-      DATABASE_URL: postgres://local:password@local@moonbase-db
+      DATABASE_URL: postgres://admin:admin@moonbase-db/moonbase
     ports:
       - 8080:8080
     volumes:
@@ -22,8 +22,9 @@ services:
     container_name: moonbase-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: local
-      POSTGRES_PASSWORD: password@local
+      POSTGRES_DB: moonbase
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
     ports:
       - 5432:5432
     networks:
