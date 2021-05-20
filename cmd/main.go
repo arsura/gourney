@@ -12,9 +12,9 @@ import (
 )
 
 type application struct {
-	infoLog    *log.Logger
-	errorLog   *log.Logger
-	currencies *pgsql.CurrencyModel
+	infoLog  *log.Logger
+	errorLog *log.Logger
+	pg       *pgsql.Repositories
 }
 
 func main() {
@@ -32,12 +32,14 @@ func main() {
 	defer pool.Close()
 
 	app := &application{
-		infoLog:    infoLog,
-		errorLog:   errorLog,
-		currencies: &pgsql.CurrencyModel{Pool: pool},
+		infoLog:  infoLog,
+		errorLog: errorLog,
+		pg: &pgsql.Repositories{
+			Currencies: &pgsql.DB{Conn: pool},
+		},
 	}
 
-	server.Post("/currencies", app.createCurrency)
+	app.routes(server)
 
 	if err := server.Listen(":8080"); err != nil {
 		errorLog.Printf("Unable to start server: %v\n", err)

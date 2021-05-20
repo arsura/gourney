@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/arsura/moonbase-service/pkg/models"
+	"github.com/arsura/moonbase-service/pkg/models/pgsql"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,7 +19,7 @@ func (app *application) createCurrency(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := app.currencies.Insert(&models.Currency{
+	_, err := app.pg.Currencies.Insert(&pgsql.Currency{
 		Name:       newCurrency.Name,
 		Amount:     newCurrency.Amount,
 		Total:      newCurrency.Total,

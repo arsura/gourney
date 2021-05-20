@@ -2,24 +2,31 @@ package pgsql
 
 import (
 	"context"
-
-	"github.com/arsura/moonbase-service/pkg/models"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-type CurrencyModel struct {
-	Pool *pgxpool.Pool
+type Currency struct {
+	ID         int
+	Name       string
+	Amount     float64
+	Total      float64
+	RiseRate   float64
+	RiseFactor float64
 }
 
-func (m *CurrencyModel) Insert(p *models.Currency) (int64, error) {
+type CurrencyRepository interface {
+	Insert(p *Currency) (int64, error)
+	Get(id int) (*Currency, error)
+}
+
+func (db *DB) Insert(p *Currency) (int64, error) {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
-	result, err := m.Pool.Exec(context.Background(), stmt, p.Name, p.Amount, p.Total, p.RiseRate, p.RiseFactor)
+	result, err := db.Conn.Exec(context.Background(), stmt, p.Name, p.Amount, p.Total, p.RiseRate, p.RiseFactor)
 	if err != nil {
 		return 0, err
 	}
 	return result.RowsAffected(), nil
 }
 
-func (m *CurrencyModel) Get(id int) (*models.Currency, error) {
+func (m *DB) Get(id int) (*Currency, error) {
 	return nil, nil
 }

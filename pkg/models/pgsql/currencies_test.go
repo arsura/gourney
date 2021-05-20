@@ -1,59 +1,36 @@
 package pgsql
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/arsura/moonbase-service/pkg/models"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/stretchr/testify/mock"
 )
 
-func TestCurrencyModel_Insert(t *testing.T) {
-	type fields struct {
-		Pool *pgxpool.Pool
-	}
-	type args struct {
-		p *models.Currency
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    int64
-		wantErr bool
-	}{
-		{
-			name: "foo",
-			fields: fields{
-				Pool: (func() {
+func TestDB_Insert(t *testing.T) {
+	mockDbConn := new(MockDBConn)
+	mockDbConn.On(
+		"Exec",
+		mock.Anything,
+		"INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)",
+		"SI",
+		1000.0,
+		1000.0,
+		0.1,
+		10.0,
+	).Return(nil, nil)
 
-				}),
-			},
-			args: args{
-				p: &models.Currency{
-					Name:       "string",
-					Amount:     1000,
-					Total:      1000,
-					RiseRate:   1000,
-					RiseFactor: 1000,
-				},
-			},
-			want:    1,
-			wantErr: false,
+	db := &DB{Conn: mockDbConn}
+
+	result, err := db.Insert(
+		&Currency{
+			Name:       "SI",
+			Amount:     1000.0,
+			Total:      1000.0,
+			RiseRate:   0.1,
+			RiseFactor: 10.0,
 		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &CurrencyModel{
-				Pool: tt.fields.Pool,
-			}
-			got, err := m.Insert(tt.args.p)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("CurrencyModel.Insert() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("CurrencyModel.Insert() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	)
+	fmt.Println(result.RowsAffected, err)
+	// dbConn.AssertExpectations(t)
 }
