@@ -2,14 +2,33 @@ version: "3.8"
 
 services:
   moonbase-service:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     container_name: moonbase-service
     image: moonbase-service
     restart: unless-stopped
+    environment: 
+      DATABASE_URL: postgres://admin:admin@moonbase-db/moonbase
     ports:
       - 8080:8080
+    volumes:
+      - ./:/app
+    networks:
+      - moonbase-network
+
+  moonbase-db:
+    image: postgres:13-alpine
+    container_name: moonbase-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: moonbase
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - 5432:5432
+    networks:
+      - moonbase-network
 
 networks:
-  default:
-    external:
-      name: moonbase-network
+  moonbase-network:
