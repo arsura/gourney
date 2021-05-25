@@ -1,18 +1,28 @@
 package pgsql
 
 import (
+	"errors"
 	"testing"
 
 	pgsql_mock "github.com/arsura/moonbase-service/pkg/models/pgsql/mocks"
 	"github.com/jackc/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestDB_Insert(t *testing.T) {
-	mockDbConn := new(pgsql_mock.MockDBConn)
+type InsertTestSuite struct {
+	suite.Suite
+	mockDBConn *pgsql_mock.MockDBConn
+}
+
+func (suite *InsertTestSuite) SetupTest() {
+	suite.mockDBConn = new(pgsql_mock.MockDBConn)
+}
+
+func (suite *InsertTestSuite) Test_Insert_Success() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
-	mockDbConn.On(
+	suite.mockDBConn.On(
 		"Exec",
 		mock.Anything,
 		stmt,
@@ -23,7 +33,7 @@ func TestDB_Insert(t *testing.T) {
 		10.0,
 	).Return(pgconn.CommandTag("INSERT 0 1"), nil)
 
-	db := &DB{Conn: mockDbConn}
+	db := &DB{Conn: suite.mockDBConn}
 
 	result, err := db.Insert(
 		&Currency{
@@ -34,6 +44,38 @@ func TestDB_Insert(t *testing.T) {
 			RiseFactor: 10.0,
 		},
 	)
-	assert.Equal(t, result, int64(1))
-	assert.Nil(t, err)
+	assert.Equal(suite.T(), result, int64(1))
+	assert.Nil(suite.T(), err)
+}
+
+func (suite *InsertTestSuite) Test_Insert_Failed() {
+	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
+	suite.mockDBConn.On(
+		"Exec",
+		mock.Anything,
+		stmt,
+		"RSI",
+		1000.0,
+		1000.0,
+		0.1,
+		10.0,
+	).Return(nil, errors.New("Failed to insert."))
+
+	db := &DB{Conn: suite.mockDBConn}
+
+	result, err := db.Insert(
+		&Currency{
+			Name:       "RSI",
+			Amount:     1000.0,
+			Total:      1000.0,
+			RiseRate:   0.1,
+			RiseFactor: 10.0,
+		},
+	)
+	assert.Equal(suite.T(), result, int64(0))
+	assert.NotNil(suite.T(), err)
+}
+
+func TestInsertTestSuite(t *testing.T) {
+	suite.Run(t, new(InsertTestSuite))
 }

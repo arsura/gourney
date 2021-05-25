@@ -28,9 +28,9 @@ func (db *DB) Insert(p *Currency) (int64, error) {
 }
 
 func (db *DB) Get(id int64) (*Currency, error) {
-	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	var currency Currency
 
+	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	err := db.Conn.QueryRow(context.Background(), stmt, id).Scan(
 		&currency.ID,
 		&currency.Name,
