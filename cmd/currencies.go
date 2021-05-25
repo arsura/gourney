@@ -21,7 +21,7 @@ func (app *application) createCurrency(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := app.pg.Currencies.Insert(&pgsql.Currency{
+	_, err := app.pg.Currencies.Create(&pgsql.Currency{
 		Name:       newCurrency.Name,
 		Amount:     newCurrency.Amount,
 		Total:      newCurrency.Total,
@@ -48,7 +48,7 @@ func (app *application) findCurrency(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := app.pg.Currencies.Get(int64(id))
+	result, err := app.pg.Currencies.FindOne(int64(id))
 	if err != nil {
 		app.errorLog.Printf("Failed to find currency: %v\n", err)
 		return c.Status(404).JSON(&fiber.Map{

@@ -14,11 +14,11 @@ type Currency struct {
 }
 
 type CurrencyRepository interface {
-	Insert(p *Currency) (int64, error)
-	Get(id int64) (*Currency, error)
+	Create(p *Currency) (int64, error)
+	FindOne(id int64) (*Currency, error)
 }
 
-func (db *DB) Insert(p *Currency) (int64, error) {
+func (db *DB) Create(p *Currency) (int64, error) {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	result, err := db.Conn.Exec(context.Background(), stmt, p.Name, p.Amount, p.Total, p.RiseRate, p.RiseFactor)
 	if err != nil {
@@ -27,7 +27,7 @@ func (db *DB) Insert(p *Currency) (int64, error) {
 	return result.RowsAffected(), nil
 }
 
-func (db *DB) Get(id int64) (*Currency, error) {
+func (db *DB) FindOne(id int64) (*Currency, error) {
 	var currency Currency
 
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"

@@ -11,16 +11,16 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type InsertTestSuite struct {
+type CreateCurrencyTestSuite struct {
 	suite.Suite
 	mockDBConn *pgsql_mock.MockDBConn
 }
 
-func (suite *InsertTestSuite) SetupTest() {
+func (suite *CreateCurrencyTestSuite) SetupTest() {
 	suite.mockDBConn = new(pgsql_mock.MockDBConn)
 }
 
-func (suite *InsertTestSuite) Test_Insert_Success() {
+func (suite *CreateCurrencyTestSuite) Test_Create_Success() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	suite.mockDBConn.On(
 		"Exec",
@@ -35,7 +35,7 @@ func (suite *InsertTestSuite) Test_Insert_Success() {
 
 	db := &DB{Conn: suite.mockDBConn}
 
-	result, err := db.Insert(
+	result, err := db.Create(
 		&Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
@@ -48,7 +48,7 @@ func (suite *InsertTestSuite) Test_Insert_Success() {
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *InsertTestSuite) Test_Insert_Failed() {
+func (suite *CreateCurrencyTestSuite) Test_Insert_Failed() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	suite.mockDBConn.On(
 		"Exec",
@@ -63,7 +63,7 @@ func (suite *InsertTestSuite) Test_Insert_Failed() {
 
 	db := &DB{Conn: suite.mockDBConn}
 
-	result, err := db.Insert(
+	result, err := db.Create(
 		&Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
@@ -77,5 +77,5 @@ func (suite *InsertTestSuite) Test_Insert_Failed() {
 }
 
 func TestInsertTestSuite(t *testing.T) {
-	suite.Run(t, new(InsertTestSuite))
+	suite.Run(t, new(CreateCurrencyTestSuite))
 }
