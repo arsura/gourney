@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/arsura/moonbase-service/pkg/models/pgsql"
 	"github.com/gofiber/fiber/v2"
 )
@@ -29,8 +31,30 @@ func (app *application) createCurrency(c *fiber.Ctx) error {
 
 	if err != nil {
 		app.errorLog.Printf("Failed to create currency: %v\n", err)
-		return fiber.ErrInternalServerError
+		return c.Status(400).JSON(&fiber.Map{
+			"error": "Failed to create currency.",
+		})
 	}
 
-	return c.JSON(&fiber.Map{"ping": newCurrency})
+	return c.SendStatus(201)
+}
+
+func (app *application) findCurrency(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		app.errorLog.Printf("Failed to create currency: %v\n", err)
+		return c.Status(400).JSON(&fiber.Map{
+			"error": "Invalid currency param, it should be a number.",
+		})
+	}
+
+	result, err := app.pg.Currencies.Get(int64(id))
+	if err != nil {
+		app.errorLog.Printf("Failed to find currency: %v\n", err)
+		return c.Status(404).JSON(&fiber.Map{
+			"error": "Currency not found.",
+		})
+
+	}
+	return c.JSON(result)
 }

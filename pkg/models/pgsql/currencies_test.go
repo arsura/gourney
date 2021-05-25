@@ -3,13 +3,14 @@ package pgsql
 import (
 	"testing"
 
+	pgsql_mock "github.com/arsura/moonbase-service/pkg/models/pgsql/mocks"
 	"github.com/jackc/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestDB_Insert(t *testing.T) {
-	mockDbConn := new(MockDBConn)
+	mockDbConn := new(pgsql_mock.MockDBConn)
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	mockDbConn.On(
 		"Exec",
@@ -35,5 +36,4 @@ func TestDB_Insert(t *testing.T) {
 	)
 	assert.Equal(t, result, int64(1))
 	assert.Nil(t, err)
-
 }
