@@ -7,8 +7,9 @@ import (
 
 	handler "github.com/arsura/moonbase-service/cmd/handlers"
 	service "github.com/arsura/moonbase-service/cmd/services"
-	logger "github.com/arsura/moonbase-service/pkg/logger"
+	"github.com/arsura/moonbase-service/pkg/logger"
 	"github.com/arsura/moonbase-service/pkg/models/pgsql"
+	"github.com/arsura/moonbase-service/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -38,10 +39,15 @@ func main() {
 		},
 	}
 
+	validate, trans := validator.InitValidate()
 	app := &application{
 		logger: logger,
 		handler: &handler.Handler{
 			Service: service,
+			Validator: &validator.Validator{
+				Validate: validate,
+				Trans:    trans,
+			},
 		},
 	}
 	app.routes(server)

@@ -4,13 +4,14 @@ import (
 	"strconv"
 
 	"github.com/arsura/moonbase-service/pkg/models/pgsql"
+	"github.com/arsura/moonbase-service/pkg/util"
 	"github.com/gofiber/fiber/v2"
 )
 
 type CreateReqBody struct {
-	Name       string  `json:"name"`
-	Amount     float64 `json:"amount"`
-	Total      float64 `json:"total"`
+	Name       string  `json:"name" validate:"required"`
+	Amount     float64 `json:"amount" validate:"required"`
+	Total      float64 `json:"total" validate:"required"`
 	RiseRate   float64 `json:"riseRate"`
 	RiseFactor float64 `json:"riseFactor"`
 }
@@ -18,7 +19,15 @@ type CreateReqBody struct {
 func (h *Handler) CreateCurrencyHandler(c *fiber.Ctx) error {
 	currency := new(CreateReqBody)
 	if err := c.BodyParser(currency); err != nil {
-		return err
+		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"error": util.UnmarshalErrorParser(err),
+		})
+	}
+
+	if err := h.Validator.Validate.Struct(*currency); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"errors": h.Validator.TransError(err),
+		})
 	}
 
 	_, err := h.Service.CreateCurrency(&pgsql.Currency{
@@ -30,25 +39,25 @@ func (h *Handler) CreateCurrencyHandler(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
-		return c.Status(400).JSON(&fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
 			"error": "Failed to create currency.",
 		})
 	}
 
-	return c.SendStatus(201)
+	return c.SendStatus(fiber.StatusCreated)
 }
 
 func (h *Handler) FindCurrencyHandler(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(400).JSON(&fiber.Map{
-			"error": "Invalid param, it should be a number.",
+		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
+			"error": "id must be a number.",
 		})
 	}
 
 	result, err := h.Service.FindCurrency(int64(id))
 	if err != nil {
-		return c.Status(404).JSON(&fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
 			"error": "Currency not found.",
 		})
 
