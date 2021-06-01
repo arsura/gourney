@@ -8,6 +8,7 @@ require (
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/gofiber/fiber/v2 v2.8.0
 	github.com/jackc/pgconn v1.8.1
+	github.com/jackc/pgproto3/v2 v2.0.6
 	github.com/jackc/pgx/v4 v4.11.0
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/stretchr/objx v0.3.0 // indirect

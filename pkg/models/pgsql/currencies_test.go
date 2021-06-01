@@ -11,16 +11,16 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type CreateCurrencyTestSuite struct {
+type CurrencyTestSuite struct {
 	suite.Suite
 	mockDBConn *pgsql_mock.MockDBConn
 }
 
-func (suite *CreateCurrencyTestSuite) SetupTest() {
+func (suite *CurrencyTestSuite) SetupTest() {
 	suite.mockDBConn = new(pgsql_mock.MockDBConn)
 }
 
-func (suite *CreateCurrencyTestSuite) Test_Create_Success() {
+func (suite *CurrencyTestSuite) Test_Create_Success() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	suite.mockDBConn.On(
 		"Exec",
@@ -48,7 +48,7 @@ func (suite *CreateCurrencyTestSuite) Test_Create_Success() {
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *CreateCurrencyTestSuite) Test_Insert_Failed() {
+func (suite *CurrencyTestSuite) Test_Insert_Failed() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	suite.mockDBConn.On(
 		"Exec",
@@ -76,6 +76,54 @@ func (suite *CreateCurrencyTestSuite) Test_Insert_Failed() {
 	assert.NotNil(suite.T(), err)
 }
 
-func TestInsertTestSuite(t *testing.T) {
-	suite.Run(t, new(CreateCurrencyTestSuite))
+func (suite *CurrencyTestSuite) Test_FindOne_Success() {
+	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
+	suite.mockDBConn.
+		On(
+			"QueryRow",
+			mock.Anything,
+			stmt,
+			int64(1),
+		).
+		Return(suite.mockDBConn).
+		On(
+			"Scan",
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).
+		Run(func(args mock.Arguments) {
+			arg1 := args.Get(0).(*int64)
+			*arg1 = 1
+			arg2 := args.Get(1).(*string)
+			*arg2 = "RSI"
+			arg3 := args.Get(2).(*float64)
+			*arg3 = 1000.0
+			arg4 := args.Get(3).(*float64)
+			*arg4 = 1000.0
+			arg5 := args.Get(4).(*float64)
+			*arg5 = 0.1
+			arg6 := args.Get(5).(*float64)
+			*arg6 = 10.0
+		}).
+		Return(nil)
+
+	db := &DB{Conn: suite.mockDBConn}
+	result, err := db.FindOne(1)
+	assert.Equal(suite.T(), result, &Currency{
+		ID:         1,
+		Name:       "RSI",
+		Amount:     1000.0,
+		Total:      1000.0,
+		RiseRate:   0.1,
+		RiseFactor: 10.0,
+	})
+	assert.Nil(suite.T(), err)
+}
+
+func TestCurrencyTestSuite(t *testing.T) {
+	suite.Run(t, new(CurrencyTestSuite))
 }
