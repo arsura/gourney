@@ -29,7 +29,6 @@ func (db *DB) Create(p *Currency) (int64, error) {
 
 func (db *DB) FindOne(id int64) (*Currency, error) {
 	var currency Currency
-
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	err := db.Conn.QueryRow(context.Background(), stmt, id).Scan(
 		&currency.ID,
@@ -39,7 +38,6 @@ func (db *DB) FindOne(id int64) (*Currency, error) {
 		&currency.RiseRate,
 		&currency.RiseFactor,
 	)
-
 	if err != nil {
 		return &Currency{}, err
 	}

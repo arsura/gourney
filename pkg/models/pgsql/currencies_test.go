@@ -6,6 +6,7 @@ import (
 
 	pgsql_mock "github.com/arsura/moonbase-service/pkg/models/pgsql/mocks"
 	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -122,6 +123,33 @@ func (suite *CurrencyTestSuite) Test_FindOne_Success() {
 		RiseFactor: 10.0,
 	})
 	assert.Nil(suite.T(), err)
+}
+
+func (suite *CurrencyTestSuite) Test_FindOne_Failed() {
+	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
+	suite.mockDBConn.
+		On(
+			"QueryRow",
+			mock.Anything,
+			stmt,
+			int64(1),
+		).
+		Return(suite.mockDBConn).
+		On(
+			"Scan",
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).
+		Return(pgx.ErrNoRows)
+
+	db := &DB{Conn: suite.mockDBConn}
+	result, err := db.FindOne(1)
+	assert.Equal(suite.T(), result, &Currency{})
+	assert.NotNil(suite.T(), err)
 }
 
 func TestCurrencyTestSuite(t *testing.T) {
