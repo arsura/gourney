@@ -32,10 +32,12 @@ func main() {
 	}
 	defer pool.Close()
 
-	service := &service.Service{
-		Logger: logger,
-		Pg: &pgsql.Repositories{
-			Currencies: &pgsql.DB{Conn: pool},
+	services := &service.Services{
+		Currency: &service.Service{
+			Logger: logger,
+			PgRepo: &pgsql.Repositories{
+				Currencies: &pgsql.DB{Conn: pool},
+			},
 		},
 	}
 
@@ -43,7 +45,7 @@ func main() {
 	app := &application{
 		logger: logger,
 		handler: &handler.Handler{
-			Service: service,
+			Services: services,
 			Validator: &validator.Validator{
 				Validate: validate,
 				Trans:    trans,

@@ -6,6 +6,6 @@ import (
 )
 
 type Handler struct {
-	Service   *service.Service
+	Services  *service.Services
 	Validator *validator.Validator
 }

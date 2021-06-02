@@ -6,7 +6,6 @@ import (
 
 	pgsql_mock "github.com/arsura/moonbase-service/pkg/models/pgsql/mocks"
 	"github.com/jackc/pgconn"
-	"github.com/jackc/pgx/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -60,7 +59,7 @@ func (suite *CurrencyTestSuite) Test_Insert_Failed() {
 		1000.0,
 		0.1,
 		10.0,
-	).Return(nil, errors.New("Failed to insert."))
+	).Return(nil, errors.New("failed to insert"))
 
 	db := &DB{Conn: suite.mockDBConn}
 
@@ -113,7 +112,7 @@ func (suite *CurrencyTestSuite) Test_FindOne_Success() {
 		Return(nil)
 
 	db := &DB{Conn: suite.mockDBConn}
-	result, err := db.FindOne(1)
+	result, err := db.FindOneById(1)
 	assert.Equal(suite.T(), result, &Currency{
 		ID:         1,
 		Name:       "RSI",
@@ -144,10 +143,10 @@ func (suite *CurrencyTestSuite) Test_FindOne_Failed() {
 			mock.Anything,
 			mock.Anything,
 		).
-		Return(pgx.ErrNoRows)
+		Return(errors.New("failed to query"))
 
 	db := &DB{Conn: suite.mockDBConn}
-	result, err := db.FindOne(1)
+	result, err := db.FindOneById(1)
 	assert.Equal(suite.T(), result, &Currency{})
 	assert.NotNil(suite.T(), err)
 }

@@ -30,7 +30,7 @@ func (h *Handler) CreateCurrencyHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err := h.Service.CreateCurrency(&pgsql.Currency{
+	_, err := h.Services.Currency.Create(&pgsql.Currency{
 		Name:       currency.Name,
 		Amount:     currency.Amount,
 		Total:      currency.Total,
@@ -40,7 +40,7 @@ func (h *Handler) CreateCurrencyHandler(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
-			"error": "Failed to create currency.",
+			"error": "failed to create currency.",
 		})
 	}
 
@@ -55,10 +55,10 @@ func (h *Handler) FindCurrencyHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.Service.FindCurrency(int64(id))
+	result, err := h.Services.Currency.FindOneById(int64(id))
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
-			"error": "Currency not found.",
+			"error": "currency not found.",
 		})
 
 	}

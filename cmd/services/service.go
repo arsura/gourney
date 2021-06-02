@@ -8,5 +8,9 @@ import (
 
 type Service struct {
 	Logger *logger.Logger
-	Pg     *pgsql.Repositories
+	PgRepo *pgsql.Repositories
+}
+
+type Services struct {
+	Currency CurrencyService
 }

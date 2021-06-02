@@ -15,7 +15,7 @@ type Currency struct {
 
 type CurrencyRepository interface {
 	Create(p *Currency) (int64, error)
-	FindOne(id int64) (*Currency, error)
+	FindOneById(id int64) (*Currency, error)
 }
 
 func (db *DB) Create(p *Currency) (int64, error) {
@@ -27,7 +27,7 @@ func (db *DB) Create(p *Currency) (int64, error) {
 	return result.RowsAffected(), nil
 }
 
-func (db *DB) FindOne(id int64) (*Currency, error) {
+func (db *DB) FindOneById(id int64) (*Currency, error) {
 	var currency Currency
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	err := db.Conn.QueryRow(context.Background(), stmt, id).Scan(
