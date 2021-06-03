@@ -1,16 +1,22 @@
 package service
 
 import (
+	logger "github.com/arsura/moonbase-service/pkg/logger"
 	"github.com/arsura/moonbase-service/pkg/models/pgsql"
 )
 
-type CurrencyService interface {
-	Create(c *pgsql.Currency) (int64, error)
-	FindOneById(id int64) (*pgsql.Currency, error)
+type CurrencyService struct {
+	Logger       *logger.Logger
+	CurrencyRepo pgsql.CurrencyRepoProvider
 }
 
-func (s *Service) Create(c *pgsql.Currency) (int64, error) {
-	result, err := s.PgRepo.Currencies.Create(&pgsql.Currency{
+type CurrencyServiceProvider interface {
+	Create(c *pgsql.Currency) (int64, error)
+	FindOneByID(id int64) (*pgsql.Currency, error)
+}
+
+func (s *CurrencyService) Create(c *pgsql.Currency) (int64, error) {
+	result, err := s.CurrencyRepo.Create(&pgsql.Currency{
 		Name:       c.Name,
 		Amount:     c.Amount,
 		Total:      c.Total,
@@ -18,14 +24,14 @@ func (s *Service) Create(c *pgsql.Currency) (int64, error) {
 		RiseFactor: c.RiseFactor,
 	})
 	if err != nil {
-		s.Logger.Error.Printf("failed to create currency: %v\n", err)
+		// s.Logger.Error.Printf("failed to create currency: %v\n", err)
 		return 0, err
 	}
 	return result, nil
 }
 
-func (s *Service) FindOneById(id int64) (*pgsql.Currency, error) {
-	result, err := s.PgRepo.Currencies.FindOneById(int64(id))
+func (s *CurrencyService) FindOneByID(id int64) (*pgsql.Currency, error) {
+	result, err := s.CurrencyRepo.FindOneByID(int64(id))
 	if err != nil {
 		s.Logger.Error.Printf("failed to find currency: %v\n", err)
 		return &pgsql.Currency{}, err

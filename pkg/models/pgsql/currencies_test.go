@@ -15,12 +15,12 @@ import (
 type CurrencyTestSuite struct {
 	suite.Suite
 	mockDBConn *pgsql_mock.MockDBConn
-	mockDB     *pgsql.DB
+	repo       *pgsql.CurrencyRepo
 }
 
 func (suite *CurrencyTestSuite) SetupTest() {
 	suite.mockDBConn = new(pgsql_mock.MockDBConn)
-	suite.mockDB = &pgsql.DB{Conn: suite.mockDBConn}
+	suite.repo = &pgsql.CurrencyRepo{Conn: suite.mockDBConn}
 }
 
 func (suite *CurrencyTestSuite) Test_Create_Success() {
@@ -36,7 +36,7 @@ func (suite *CurrencyTestSuite) Test_Create_Success() {
 		10.0,
 	).Return(pgconn.CommandTag("INSERT 0 1"), nil)
 
-	result, err := suite.mockDB.Create(
+	result, err := suite.repo.Create(
 		&pgsql.Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
@@ -62,7 +62,7 @@ func (suite *CurrencyTestSuite) Test_Insert_Failed() {
 		10.0,
 	).Return(nil, errors.New("failed to insert"))
 
-	result, err := suite.mockDB.Create(
+	result, err := suite.repo.Create(
 		&pgsql.Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
@@ -110,7 +110,7 @@ func (suite *CurrencyTestSuite) Test_FindOne_Success() {
 		}).
 		Return(nil)
 
-	result, err := suite.mockDB.FindOneById(1)
+	result, err := suite.repo.FindOneByID(1)
 	assert.Equal(suite.T(), result, &pgsql.Currency{
 		ID:         1,
 		Name:       "RSI",
@@ -143,7 +143,7 @@ func (suite *CurrencyTestSuite) Test_FindOne_Failed() {
 		).
 		Return(errors.New("failed to query"))
 
-	result, err := suite.mockDB.FindOneById(1)
+	result, err := suite.repo.FindOneByID(1)
 	assert.Equal(suite.T(), result, &pgsql.Currency{})
 	assert.NotNil(suite.T(), err)
 }

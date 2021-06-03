@@ -17,7 +17,7 @@ import (
 
 type application struct {
 	logger  *logger.Logger
-	handler *handler.Handler
+	handler *handler.Handlers
 }
 
 func main() {
@@ -33,22 +33,22 @@ func main() {
 	defer pool.Close()
 
 	services := &service.Services{
-		Currency: &service.Service{
-			Logger: logger,
-			PgRepo: &pgsql.Repositories{
-				Currencies: &pgsql.DB{Conn: pool},
-			},
+		Currencies: &service.CurrencyService{
+			Logger:       logger,
+			CurrencyRepo: &pgsql.CurrencyRepo{Conn: pool},
 		},
 	}
 
 	validate, trans := validator.InitValidate()
 	app := &application{
 		logger: logger,
-		handler: &handler.Handler{
-			Services: services,
-			Validator: &validator.Validator{
-				Validate: validate,
-				Trans:    trans,
+		handler: &handler.Handlers{
+			Currencies: &handler.CurrencyHandler{
+				Validator: &validator.Validator{
+					Validate: validate,
+					Trans:    trans,
+				},
+				CurrencyService: services.Currencies,
 			},
 		},
 	}

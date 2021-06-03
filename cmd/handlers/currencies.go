@@ -3,8 +3,10 @@ package handler
 import (
 	"strconv"
 
+	service "github.com/arsura/moonbase-service/cmd/services"
 	"github.com/arsura/moonbase-service/pkg/models/pgsql"
 	"github.com/arsura/moonbase-service/pkg/util"
+	validator "github.com/arsura/moonbase-service/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -16,7 +18,17 @@ type CreateReqBody struct {
 	RiseFactor float64 `json:"riseFactor"`
 }
 
-func (h *Handler) CreateCurrencyHandler(c *fiber.Ctx) error {
+type CurrencyHandler struct {
+	Validator       *validator.Validator
+	CurrencyService service.CurrencyServiceProvider
+}
+
+type CurrencyHandlerProvider interface {
+	CreateCurrencyHandler(c *fiber.Ctx) error
+	FindCurrencyByIDHandler(c *fiber.Ctx) error
+}
+
+func (h *CurrencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 	currency := new(CreateReqBody)
 	if err := c.BodyParser(currency); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
@@ -30,7 +42,7 @@ func (h *Handler) CreateCurrencyHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err := h.Services.Currency.Create(&pgsql.Currency{
+	_, err := h.CurrencyService.Create(&pgsql.Currency{
 		Name:       currency.Name,
 		Amount:     currency.Amount,
 		Total:      currency.Total,
@@ -47,7 +59,7 @@ func (h *Handler) CreateCurrencyHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-func (h *Handler) FindCurrencyHandler(c *fiber.Ctx) error {
+func (h *CurrencyHandler) FindCurrencyByIDHandler(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
@@ -55,7 +67,7 @@ func (h *Handler) FindCurrencyHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.Services.Currency.FindOneById(int64(id))
+	result, err := h.CurrencyService.FindOneByID(int64(id))
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
 			"error": "currency not found.",

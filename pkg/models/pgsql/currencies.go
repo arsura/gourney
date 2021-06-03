@@ -13,12 +13,16 @@ type Currency struct {
 	RiseFactor float64
 }
 
-type CurrencyRepository interface {
-	Create(p *Currency) (int64, error)
-	FindOneById(id int64) (*Currency, error)
+type CurrencyRepo struct {
+	Conn DBConn
 }
 
-func (db *DB) Create(p *Currency) (int64, error) {
+type CurrencyRepoProvider interface {
+	Create(p *Currency) (int64, error)
+	FindOneByID(id int64) (*Currency, error)
+}
+
+func (db *CurrencyRepo) Create(p *Currency) (int64, error) {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	result, err := db.Conn.Exec(context.Background(), stmt, p.Name, p.Amount, p.Total, p.RiseRate, p.RiseFactor)
 	if err != nil {
@@ -27,7 +31,7 @@ func (db *DB) Create(p *Currency) (int64, error) {
 	return result.RowsAffected(), nil
 }
 
-func (db *DB) FindOneById(id int64) (*Currency, error) {
+func (db *CurrencyRepo) FindOneByID(id int64) (*Currency, error) {
 	var currency Currency
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	err := db.Conn.QueryRow(context.Background(), stmt, id).Scan(

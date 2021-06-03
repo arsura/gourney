@@ -13,21 +13,19 @@ import (
 
 type CurrencyTestSuite struct {
 	suite.Suite
-	mockRepositories *pgsql_mock.MockCurrencyRepository
-	mockService      *service.Service
+	mockRepo *pgsql_mock.MockCurrencyRepo
+	service  *service.CurrencyService
 }
 
 func (suite *CurrencyTestSuite) SetupTest() {
-	suite.mockRepositories = new(pgsql_mock.MockCurrencyRepository)
-	suite.mockService = &service.Service{
-		PgRepo: &pgsql.Repositories{
-			Currencies: suite.mockRepositories,
-		},
+	suite.mockRepo = new(pgsql_mock.MockCurrencyRepo)
+	suite.service = &service.CurrencyService{
+		CurrencyRepo: suite.mockRepo,
 	}
 }
 
 func (suite *CurrencyTestSuite) Test_Create_Success() {
-	suite.mockRepositories.On("Create", &pgsql.Currency{
+	suite.mockRepo.On("Create", &pgsql.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -35,7 +33,7 @@ func (suite *CurrencyTestSuite) Test_Create_Success() {
 		RiseFactor: 10.0,
 	}).Return(int64(1), nil)
 
-	result, err := suite.mockService.Create(&pgsql.Currency{
+	result, err := suite.service.Create(&pgsql.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -47,7 +45,7 @@ func (suite *CurrencyTestSuite) Test_Create_Success() {
 }
 
 func (suite *CurrencyTestSuite) Test_Create_Failed() {
-	suite.mockRepositories.On("Create", &pgsql.Currency{
+	suite.mockRepo.On("Create", &pgsql.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -55,7 +53,7 @@ func (suite *CurrencyTestSuite) Test_Create_Failed() {
 		RiseFactor: 10.0,
 	}).Return(int64(0), errors.New("failed to insert"))
 
-	result, err := suite.mockService.Create(&pgsql.Currency{
+	result, err := suite.service.Create(&pgsql.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
