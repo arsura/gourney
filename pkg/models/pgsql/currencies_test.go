@@ -1,9 +1,10 @@
-package pgsql
+package pgsql_test
 
 import (
 	"errors"
 	"testing"
 
+	"github.com/arsura/moonbase-service/pkg/models/pgsql"
 	pgsql_mock "github.com/arsura/moonbase-service/pkg/models/pgsql/mocks"
 	"github.com/jackc/pgconn"
 	"github.com/stretchr/testify/assert"
@@ -14,10 +15,12 @@ import (
 type CurrencyTestSuite struct {
 	suite.Suite
 	mockDBConn *pgsql_mock.MockDBConn
+	mockDB     *pgsql.DB
 }
 
 func (suite *CurrencyTestSuite) SetupTest() {
 	suite.mockDBConn = new(pgsql_mock.MockDBConn)
+	suite.mockDB = &pgsql.DB{Conn: suite.mockDBConn}
 }
 
 func (suite *CurrencyTestSuite) Test_Create_Success() {
@@ -33,10 +36,8 @@ func (suite *CurrencyTestSuite) Test_Create_Success() {
 		10.0,
 	).Return(pgconn.CommandTag("INSERT 0 1"), nil)
 
-	db := &DB{Conn: suite.mockDBConn}
-
-	result, err := db.Create(
-		&Currency{
+	result, err := suite.mockDB.Create(
+		&pgsql.Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
 			Total:      1000.0,
@@ -61,10 +62,8 @@ func (suite *CurrencyTestSuite) Test_Insert_Failed() {
 		10.0,
 	).Return(nil, errors.New("failed to insert"))
 
-	db := &DB{Conn: suite.mockDBConn}
-
-	result, err := db.Create(
-		&Currency{
+	result, err := suite.mockDB.Create(
+		&pgsql.Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
 			Total:      1000.0,
@@ -111,9 +110,8 @@ func (suite *CurrencyTestSuite) Test_FindOne_Success() {
 		}).
 		Return(nil)
 
-	db := &DB{Conn: suite.mockDBConn}
-	result, err := db.FindOneById(1)
-	assert.Equal(suite.T(), result, &Currency{
+	result, err := suite.mockDB.FindOneById(1)
+	assert.Equal(suite.T(), result, &pgsql.Currency{
 		ID:         1,
 		Name:       "RSI",
 		Amount:     1000.0,
@@ -145,9 +143,8 @@ func (suite *CurrencyTestSuite) Test_FindOne_Failed() {
 		).
 		Return(errors.New("failed to query"))
 
-	db := &DB{Conn: suite.mockDBConn}
-	result, err := db.FindOneById(1)
-	assert.Equal(suite.T(), result, &Currency{})
+	result, err := suite.mockDB.FindOneById(1)
+	assert.Equal(suite.T(), result, &pgsql.Currency{})
 	assert.NotNil(suite.T(), err)
 }
 
