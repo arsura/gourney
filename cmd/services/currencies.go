@@ -1,12 +1,12 @@
 package service
 
 import (
-	logger "github.com/arsura/moonbase-service/pkg/logger"
 	"github.com/arsura/moonbase-service/pkg/models/pgsql"
+	"go.uber.org/zap"
 )
 
 type CurrencyService struct {
-	Logger       *logger.Logger
+	Logger       *zap.SugaredLogger
 	CurrencyRepo pgsql.CurrencyRepoProvider
 }
 
@@ -24,7 +24,7 @@ func (s *CurrencyService) Create(c *pgsql.Currency) (int64, error) {
 		RiseFactor: c.RiseFactor,
 	})
 	if err != nil {
-		// s.Logger.Error.Printf("failed to create currency: %v\n", err)
+		s.Logger.Errorf("Failed to create currency: %v", err)
 		return 0, err
 	}
 	return result, nil
@@ -33,7 +33,7 @@ func (s *CurrencyService) Create(c *pgsql.Currency) (int64, error) {
 func (s *CurrencyService) FindOneByID(id int64) (*pgsql.Currency, error) {
 	result, err := s.CurrencyRepo.FindOneByID(int64(id))
 	if err != nil {
-		s.Logger.Error.Printf("failed to find currency: %v\n", err)
+		s.Logger.Errorf("Failed to find currency: %v", err)
 		return &pgsql.Currency{}, err
 	}
 	return result, nil

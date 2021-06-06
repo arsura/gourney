@@ -12,18 +12,18 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type CurrencyTestSuite struct {
+type CurrencyRepoTestSuite struct {
 	suite.Suite
 	mockDBConn *pgsql_mock.MockDBConn
 	repo       *pgsql.CurrencyRepo
 }
 
-func (suite *CurrencyTestSuite) SetupTest() {
+func (suite *CurrencyRepoTestSuite) SetupTest() {
 	suite.mockDBConn = new(pgsql_mock.MockDBConn)
 	suite.repo = &pgsql.CurrencyRepo{Conn: suite.mockDBConn}
 }
 
-func (suite *CurrencyTestSuite) Test_Create_Success() {
+func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Success() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	suite.mockDBConn.On(
 		"Exec",
@@ -49,7 +49,7 @@ func (suite *CurrencyTestSuite) Test_Create_Success() {
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *CurrencyTestSuite) Test_Insert_Failed() {
+func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Failed() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	suite.mockDBConn.On(
 		"Exec",
@@ -75,7 +75,7 @@ func (suite *CurrencyTestSuite) Test_Insert_Failed() {
 	assert.NotNil(suite.T(), err)
 }
 
-func (suite *CurrencyTestSuite) Test_FindOne_Success() {
+func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Success() {
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	suite.mockDBConn.
 		On(
@@ -122,7 +122,7 @@ func (suite *CurrencyTestSuite) Test_FindOne_Success() {
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *CurrencyTestSuite) Test_FindOne_Failed() {
+func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Failed() {
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	suite.mockDBConn.
 		On(
@@ -148,6 +148,6 @@ func (suite *CurrencyTestSuite) Test_FindOne_Failed() {
 	assert.NotNil(suite.T(), err)
 }
 
-func TestCurrencyTestSuite(t *testing.T) {
-	suite.Run(t, new(CurrencyTestSuite))
+func TestCurrencyRepoTestSuite(t *testing.T) {
+	suite.Run(t, new(CurrencyRepoTestSuite))
 }

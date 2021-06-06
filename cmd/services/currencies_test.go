@@ -9,22 +9,25 @@ import (
 	pgsql_mock "github.com/arsura/moonbase-service/pkg/models/pgsql/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap/zaptest"
 )
 
-type CurrencyTestSuite struct {
+type CurrencyServiceTestSuite struct {
 	suite.Suite
 	mockRepo *pgsql_mock.MockCurrencyRepo
 	service  *service.CurrencyService
 }
 
-func (suite *CurrencyTestSuite) SetupTest() {
+func (suite *CurrencyServiceTestSuite) SetupTest() {
+	logger := zaptest.NewLogger(suite.T()).Sugar()
 	suite.mockRepo = new(pgsql_mock.MockCurrencyRepo)
 	suite.service = &service.CurrencyService{
+		Logger:       logger,
 		CurrencyRepo: suite.mockRepo,
 	}
 }
 
-func (suite *CurrencyTestSuite) Test_Create_Success() {
+func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Success() {
 	suite.mockRepo.On("Create", &pgsql.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
@@ -44,14 +47,14 @@ func (suite *CurrencyTestSuite) Test_Create_Success() {
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *CurrencyTestSuite) Test_Create_Failed() {
+func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Failed() {
 	suite.mockRepo.On("Create", &pgsql.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
-	}).Return(int64(0), errors.New("failed to insert"))
+	}).Return(int64(0), errors.New("Failed to insert"))
 
 	result, err := suite.service.Create(&pgsql.Currency{
 		Name:       "RSI",
@@ -65,6 +68,6 @@ func (suite *CurrencyTestSuite) Test_Create_Failed() {
 	assert.NotNil(suite.T(), err)
 }
 
-func TestCurrencyTestSuite(t *testing.T) {
-	suite.Run(t, new(CurrencyTestSuite))
+func TestCurrencyServiceTestSuite(t *testing.T) {
+	suite.Run(t, new(CurrencyServiceTestSuite))
 }

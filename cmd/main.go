@@ -16,7 +16,6 @@ import (
 )
 
 type application struct {
-	logger  *logger.Logger
 	handler *handler.Handlers
 }
 
@@ -25,9 +24,10 @@ func main() {
 	server.Use(cors.New())
 
 	logger := logger.InitLog()
+
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		logger.Error.Printf("Unable to connect database: %v\n", err)
+		logger.Errorf("Unable to connect database: %v\n", err)
 		os.Exit(1)
 	}
 	defer pool.Close()
@@ -41,7 +41,6 @@ func main() {
 
 	validate, trans := validator.InitValidate()
 	app := &application{
-		logger: logger,
 		handler: &handler.Handlers{
 			Currencies: &handler.CurrencyHandler{
 				Validator: &validator.Validator{
@@ -56,7 +55,7 @@ func main() {
 
 	port := fmt.Sprintf(":%s", os.Getenv("APP_PORT"))
 	if err := server.Listen(port); err != nil {
-		logger.Error.Printf("Unable to start server: %v\n", err)
+		logger.Errorf("Unable to start server: %v", err)
 		os.Exit(1)
 	}
 }

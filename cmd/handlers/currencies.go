@@ -5,7 +5,7 @@ import (
 
 	service "github.com/arsura/moonbase-service/cmd/services"
 	"github.com/arsura/moonbase-service/pkg/models/pgsql"
-	"github.com/arsura/moonbase-service/pkg/util"
+	util "github.com/arsura/moonbase-service/pkg/utils"
 	validator "github.com/arsura/moonbase-service/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 )
