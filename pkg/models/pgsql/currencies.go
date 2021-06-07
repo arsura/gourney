@@ -5,12 +5,12 @@ import (
 )
 
 type Currency struct {
-	ID         int64
-	Name       string
-	Amount     float64
-	Total      float64
-	RiseRate   float64
-	RiseFactor float64
+	ID         int64   `json:"id"`
+	Name       string  `json:"name"`
+	Amount     float64 `json:"amount"`
+	Total      float64 `json:"total"`
+	RiseRate   float64 `json:"riseRate"`
+	RiseFactor float64 `json:"riseFactor"`
 }
 
 type CurrencyRepo struct {

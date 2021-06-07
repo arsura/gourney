@@ -35,7 +35,6 @@ func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Success() {
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}).Return(int64(1), nil)
-
 	result, err := suite.service.Create(&pgsql.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
@@ -55,7 +54,6 @@ func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Failed() {
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}).Return(int64(0), errors.New("Failed to insert"))
-
 	result, err := suite.service.Create(&pgsql.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
@@ -63,8 +61,33 @@ func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Failed() {
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	})
-
 	assert.Equal(suite.T(), result, int64(0))
+	assert.NotNil(suite.T(), err)
+}
+
+func (suite *CurrencyServiceTestSuite) Test_FindOneByID_Currency_Service_Success() {
+	suite.mockRepo.On("FindOneByID", int64(1)).Return(&pgsql.Currency{
+		Name:       "RSI",
+		Amount:     1000.0,
+		Total:      1000.0,
+		RiseRate:   0.1,
+		RiseFactor: 10.0,
+	}, nil)
+	result, err := suite.service.FindOneByID(int64(1))
+	assert.Equal(suite.T(), result, &pgsql.Currency{
+		Name:       "RSI",
+		Amount:     1000.0,
+		Total:      1000.0,
+		RiseRate:   0.1,
+		RiseFactor: 10.0,
+	})
+	assert.Nil(suite.T(), err)
+}
+
+func (suite *CurrencyServiceTestSuite) Test_FindOneByID_Currency_Service_Failed() {
+	suite.mockRepo.On("FindOneByID", int64(1)).Return(nil, errors.New("failed to find currency"))
+	result, err := suite.service.FindOneByID(int64(1))
+	assert.Nil(suite.T(), result)
 	assert.NotNil(suite.T(), err)
 }
 

@@ -23,7 +23,7 @@ func main() {
 	server := fiber.New()
 	server.Use(cors.New())
 
-	logger := logger.InitLog()
+	logger := logger.InitLogger()
 
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {

@@ -52,7 +52,7 @@ func (h *CurrencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
-			"error": "failed to create currency.",
+			"error": "failed to create currency",
 		})
 	}
 
@@ -63,14 +63,14 @@ func (h *CurrencyHandler) FindCurrencyByIDHandler(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
-			"error": "id must be a number.",
+			"error": "id must be a number",
 		})
 	}
 
 	result, err := h.CurrencyService.FindOneByID(int64(id))
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
-			"error": "currency not found.",
+			"error": "currency not found",
 		})
 
 	}

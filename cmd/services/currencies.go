@@ -34,7 +34,7 @@ func (s *CurrencyService) FindOneByID(id int64) (*pgsql.Currency, error) {
 	result, err := s.CurrencyRepo.FindOneByID(int64(id))
 	if err != nil {
 		s.Logger.Errorf("Failed to find currency: %v", err)
-		return &pgsql.Currency{}, err
+		return nil, err
 	}
 	return result, nil
 }
