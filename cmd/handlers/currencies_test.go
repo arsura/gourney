@@ -24,7 +24,7 @@ type CurrencyHandlerTestSuite struct {
 }
 
 func (suite *CurrencyHandlerTestSuite) SetupTest() {
-	validate, trans := validator.InitValidate()
+	validate, trans := validator.InitValidator()
 	suite.mockService = new(service_mock.MockCurrencyServiceProvider)
 	suite.handler = &handler.CurrencyHandler{
 		Validator: &validator.Validator{

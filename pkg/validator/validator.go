@@ -24,7 +24,7 @@ func (v *Validator) TransError(err error) []string {
 	return result
 }
 
-func InitValidate() (*gpg_validator.Validate, ut.Translator) {
+func InitValidator() (*gpg_validator.Validate, ut.Translator) {
 	en := en.New()
 	uni := ut.New(en, en)
 	trans, _ := uni.GetTranslator("en")

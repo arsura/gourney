@@ -10,7 +10,7 @@ func InitLogger() *zap.SugaredLogger {
 	rawJSON := []byte(`{
 		"level": "debug",
 		"encoding": "json",
-		"outputPaths": ["stdout", "/tmp/logs"],
+		"outputPaths": ["stdout", "/app/logs"],
 		"errorOutputPaths": ["stderr"],
 		"encoderConfig": {
 		  "messageKey": "message",
