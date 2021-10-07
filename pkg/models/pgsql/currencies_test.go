@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/arsura/moonbase-service/pkg/models/pgsql"
-	pgsql_mock "github.com/arsura/moonbase-service/pkg/models/pgsql/mocks"
+	"github.com/arsura/gourney/pkg/models/pgsql"
+	pgsql_mock "github.com/arsura/gourney/pkg/models/pgsql/mocks"
 	"github.com/jackc/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

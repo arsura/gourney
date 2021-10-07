@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	service "github.com/arsura/moonbase-service/cmd/services"
-	"github.com/arsura/moonbase-service/pkg/models/pgsql"
-	pgsql_mock "github.com/arsura/moonbase-service/pkg/models/pgsql/mocks"
+	service "github.com/arsura/gourney/cmd/services"
+	"github.com/arsura/gourney/pkg/models/pgsql"
+	pgsql_mock "github.com/arsura/gourney/pkg/models/pgsql/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zaptest"

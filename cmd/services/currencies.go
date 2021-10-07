@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/arsura/moonbase-service/pkg/models/pgsql"
+	"github.com/arsura/gourney/pkg/models/pgsql"
 	"go.uber.org/zap"
 )
 

@@ -3,7 +3,7 @@
 package service_mock
 
 import (
-	pgsql "github.com/arsura/moonbase-service/pkg/models/pgsql"
+	pgsql "github.com/arsura/gourney/pkg/models/pgsql"
 	mock "github.com/stretchr/testify/mock"
 )
 

@@ -1,35 +1,35 @@
 version: "3.8"
 
 services:
-  moonbase-service:
+  gourney:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: moonbase-service
-    image: moonbase-service
-    restart: unless-stopped
+    container_name: gourney
+    image: gourney
+    restart: "no"
     environment: 
       APP_PORT: 8080
-      DATABASE_URL: postgres://admin:admin@moonbase-db/moonbase
+      DATABASE_URL: postgres://admin:admin@gourney-db/gourney
     ports:
       - 8080:8080
     volumes:
       - ./:/app
     networks:
-      - moonbase-network
+      - gourney
 
-  moonbase-db:
-    image: postgres:13-alpine
-    container_name: moonbase-db
-    restart: unless-stopped
+  gourney-db:
+    image: postgres:14-alpine
+    container_name: gourney-db
+    restart: "no"
     environment:
-      POSTGRES_DB: moonbase
+      POSTGRES_DB: gourney
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     ports:
       - 5432:5432
     networks:
-      - moonbase-network
+      - gourney
 
 networks:
-  moonbase-network:
+  gourney:
