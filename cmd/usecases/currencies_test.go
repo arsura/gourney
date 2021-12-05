@@ -1,41 +1,41 @@
-package service_test
+package usecase_test
 
 import (
 	"errors"
 	"testing"
 
-	service "github.com/arsura/gourney/cmd/services"
-	"github.com/arsura/gourney/pkg/models/pgsql"
-	pgsql_mock "github.com/arsura/gourney/pkg/models/pgsql/mocks"
+	usecase "github.com/arsura/gourney/cmd/usecases"
+	repo "github.com/arsura/gourney/pkg/repositories"
+	pgsql_mock "github.com/arsura/gourney/pkg/repositories/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zaptest"
 )
 
-type CurrencyServiceTestSuite struct {
+type CurrencyUsecaseTestSuite struct {
 	suite.Suite
 	mockRepo *pgsql_mock.MockCurrencyRepo
-	service  *service.CurrencyService
+	usecase  *usecase.CurrencyUsecase
 }
 
-func (suite *CurrencyServiceTestSuite) SetupTest() {
+func (suite *CurrencyUsecaseTestSuite) SetupTest() {
 	logger := zaptest.NewLogger(suite.T()).Sugar()
 	suite.mockRepo = new(pgsql_mock.MockCurrencyRepo)
-	suite.service = &service.CurrencyService{
+	suite.usecase = &usecase.CurrencyUsecase{
 		Logger:       logger,
 		CurrencyRepo: suite.mockRepo,
 	}
 }
 
-func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Success() {
-	suite.mockRepo.On("Create", &pgsql.Currency{
+func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Success() {
+	suite.mockRepo.On("Create", &repo.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}).Return(int64(1), nil)
-	result, err := suite.service.Create(&pgsql.Currency{
+	result, err := suite.usecase.Create(&repo.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -46,15 +46,15 @@ func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Success() {
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Failed() {
-	suite.mockRepo.On("Create", &pgsql.Currency{
+func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Failed() {
+	suite.mockRepo.On("Create", &repo.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}).Return(int64(0), errors.New("Failed to insert"))
-	result, err := suite.service.Create(&pgsql.Currency{
+	result, err := suite.usecase.Create(&repo.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -65,16 +65,16 @@ func (suite *CurrencyServiceTestSuite) Test_Create_Currency_Service_Failed() {
 	assert.NotNil(suite.T(), err)
 }
 
-func (suite *CurrencyServiceTestSuite) Test_FindOneByID_Currency_Service_Success() {
-	suite.mockRepo.On("FindOneByID", int64(1)).Return(&pgsql.Currency{
+func (suite *CurrencyUsecaseTestSuite) Test_FindOneById_Currency_Usecase_Success() {
+	suite.mockRepo.On("FindOneById", int64(1)).Return(&repo.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}, nil)
-	result, err := suite.service.FindOneByID(int64(1))
-	assert.Equal(suite.T(), result, &pgsql.Currency{
+	result, err := suite.usecase.FindOneById(int64(1))
+	assert.Equal(suite.T(), result, &repo.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -84,13 +84,13 @@ func (suite *CurrencyServiceTestSuite) Test_FindOneByID_Currency_Service_Success
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *CurrencyServiceTestSuite) Test_FindOneByID_Currency_Service_Failed() {
-	suite.mockRepo.On("FindOneByID", int64(1)).Return(nil, errors.New("failed to find currency"))
-	result, err := suite.service.FindOneByID(int64(1))
+func (suite *CurrencyUsecaseTestSuite) Test_FindOneById_Currency_Usecase_Failed() {
+	suite.mockRepo.On("FindOneById", int64(1)).Return(nil, errors.New("failed to find currency"))
+	result, err := suite.usecase.FindOneById(int64(1))
 	assert.Nil(suite.T(), result)
 	assert.NotNil(suite.T(), err)
 }
 
-func TestCurrencyServiceTestSuite(t *testing.T) {
-	suite.Run(t, new(CurrencyServiceTestSuite))
+func TestCurrencyUsecaseTestSuite(t *testing.T) {
+	suite.Run(t, new(CurrencyUsecaseTestSuite))
 }

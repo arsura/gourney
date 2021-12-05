@@ -1,11 +1,11 @@
-package pgsql
+package repository
 
 import (
 	"context"
 )
 
 type Currency struct {
-	ID         int64   `json:"id"`
+	Id         int64   `json:"id"`
 	Name       string  `json:"name"`
 	Amount     float64 `json:"amount"`
 	Total      float64 `json:"total"`
@@ -14,12 +14,12 @@ type Currency struct {
 }
 
 type CurrencyRepo struct {
-	Conn DBConn
+	Conn DbConn
 }
 
 type CurrencyRepoProvider interface {
 	Create(p *Currency) (int64, error)
-	FindOneByID(id int64) (*Currency, error)
+	FindOneById(id int64) (*Currency, error)
 }
 
 func (db *CurrencyRepo) Create(p *Currency) (int64, error) {
@@ -31,11 +31,11 @@ func (db *CurrencyRepo) Create(p *Currency) (int64, error) {
 	return result.RowsAffected(), nil
 }
 
-func (db *CurrencyRepo) FindOneByID(id int64) (*Currency, error) {
+func (db *CurrencyRepo) FindOneById(id int64) (*Currency, error) {
 	var currency Currency
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	err := db.Conn.QueryRow(context.Background(), stmt, id).Scan(
-		&currency.ID,
+		&currency.Id,
 		&currency.Name,
 		&currency.Amount,
 		&currency.Total,

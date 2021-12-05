@@ -2,28 +2,19 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
+	"strconv"
 
-	handler "github.com/arsura/gourney/cmd/handlers"
-	service "github.com/arsura/gourney/cmd/services"
+	api "github.com/arsura/gourney/cmd/api"
 	"github.com/arsura/gourney/pkg/logger"
-	"github.com/arsura/gourney/pkg/models/pgsql"
 	"github.com/arsura/gourney/pkg/validator"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-type application struct {
-	handler *handler.Handlers
-}
-
 func main() {
-	server := fiber.New()
-	server.Use(cors.New())
 
 	logger := logger.InitLogger()
+	validatr, trans := validator.InitValidator()
 
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -32,26 +23,20 @@ func main() {
 	}
 	defer pool.Close()
 
-	validate, trans := validator.InitValidator()
-	app := &application{
-		handler: &handler.Handlers{
-			Currencies: &handler.CurrencyHandler{
-				Validator: &validator.Validator{
-					Validate: validate,
-					Trans:    trans,
-				},
-				CurrencyService: &service.CurrencyService{
-					Logger:       logger,
-					CurrencyRepo: &pgsql.CurrencyRepo{Conn: pool},
-				},
+	if isApiEnable, err := strconv.ParseBool(os.Getenv("IS_API_ENABLE")); err == nil && isApiEnable == true {
+		api := &api.Application{
+			Validator: &validator.Validator{
+				Validate: validatr,
+				Trans:    trans,
 			},
-		},
+			Logger: logger,
+			Conn: pool,
+		}
+		api.RunApi()
 	}
-	app.routes(server)
 
-	port := fmt.Sprintf(":%s", os.Getenv("APP_PORT"))
-	if err := server.Listen(port); err != nil {
-		logger.Errorf("Unable to start server: %v", err)
-		os.Exit(1)
-	}
+	// if isRabbitMqEnable ? 
+	// if isKafkaEnable ?
+	// if bla bla app enable
+
 }

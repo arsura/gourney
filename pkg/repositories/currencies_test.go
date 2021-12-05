@@ -1,11 +1,11 @@
-package pgsql_test
+package repository_test
 
 import (
 	"errors"
 	"testing"
 
-	"github.com/arsura/gourney/pkg/models/pgsql"
-	pgsql_mock "github.com/arsura/gourney/pkg/models/pgsql/mocks"
+	"github.com/arsura/gourney/pkg/repositories"
+	repository_mock "github.com/arsura/gourney/pkg/repositories/mocks"
 	"github.com/jackc/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -14,18 +14,18 @@ import (
 
 type CurrencyRepoTestSuite struct {
 	suite.Suite
-	mockDBConn *pgsql_mock.MockDBConn
-	repo       *pgsql.CurrencyRepo
+	mockDbConn *repository_mock.MockDbConn
+	repo       *repository.CurrencyRepo
 }
 
 func (suite *CurrencyRepoTestSuite) SetupTest() {
-	suite.mockDBConn = new(pgsql_mock.MockDBConn)
-	suite.repo = &pgsql.CurrencyRepo{Conn: suite.mockDBConn}
+	suite.mockDbConn = new(repository_mock.MockDbConn)
+	suite.repo = &repository.CurrencyRepo{Conn: suite.mockDbConn}
 }
 
 func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Success() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
-	suite.mockDBConn.On(
+	suite.mockDbConn.On(
 		"Exec",
 		mock.Anything,
 		stmt,
@@ -37,7 +37,7 @@ func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Success() {
 	).Return(pgconn.CommandTag("INSERT 0 1"), nil)
 
 	result, err := suite.repo.Create(
-		&pgsql.Currency{
+		&repository.Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
 			Total:      1000.0,
@@ -51,7 +51,7 @@ func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Success() {
 
 func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Failed() {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
-	suite.mockDBConn.On(
+	suite.mockDbConn.On(
 		"Exec",
 		mock.Anything,
 		stmt,
@@ -63,7 +63,7 @@ func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Failed() {
 	).Return(nil, errors.New("failed to insert"))
 
 	result, err := suite.repo.Create(
-		&pgsql.Currency{
+		&repository.Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
 			Total:      1000.0,
@@ -77,14 +77,14 @@ func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Failed() {
 
 func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Success() {
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
-	suite.mockDBConn.
+	suite.mockDbConn.
 		On(
 			"QueryRow",
 			mock.Anything,
 			stmt,
 			int64(1),
 		).
-		Return(suite.mockDBConn).
+		Return(suite.mockDbConn).
 		On(
 			"Scan",
 			mock.Anything,
@@ -110,9 +110,9 @@ func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Success() {
 		}).
 		Return(nil)
 
-	result, err := suite.repo.FindOneByID(1)
-	assert.Equal(suite.T(), result, &pgsql.Currency{
-		ID:         1,
+	result, err := suite.repo.FindOneById(1)
+	assert.Equal(suite.T(), result, &repository.Currency{
+		Id:         1,
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -124,14 +124,14 @@ func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Success() {
 
 func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Failed() {
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
-	suite.mockDBConn.
+	suite.mockDbConn.
 		On(
 			"QueryRow",
 			mock.Anything,
 			stmt,
 			int64(1),
 		).
-		Return(suite.mockDBConn).
+		Return(suite.mockDbConn).
 		On(
 			"Scan",
 			mock.Anything,
@@ -143,8 +143,8 @@ func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Failed() {
 		).
 		Return(errors.New("failed to query"))
 
-	result, err := suite.repo.FindOneByID(1)
-	assert.Equal(suite.T(), result, &pgsql.Currency{})
+	result, err := suite.repo.FindOneById(1)
+	assert.Equal(suite.T(), result, &repository.Currency{})
 	assert.NotNil(suite.T(), err)
 }
 
