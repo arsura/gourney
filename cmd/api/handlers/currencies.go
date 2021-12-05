@@ -1,10 +1,10 @@
-package handler
+package api_handler
 
 import (
 	"strconv"
 
-	service "github.com/arsura/gourney/cmd/services"
-	"github.com/arsura/gourney/pkg/models/pgsql"
+	usecase "github.com/arsura/gourney/cmd/usecases"
+	repo "github.com/arsura/gourney/pkg/repositories"
 	util "github.com/arsura/gourney/pkg/utils"
 	validator "github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
@@ -20,12 +20,12 @@ type CreateReqBody struct {
 
 type CurrencyHandler struct {
 	Validator       *validator.Validator
-	CurrencyService service.CurrencyServiceProvider
+	CurrencyUsecase usecase.CurrencyUsecaseProvider
 }
 
 type CurrencyHandlerProvider interface {
 	CreateCurrencyHandler(c *fiber.Ctx) error
-	FindCurrencyByIDHandler(c *fiber.Ctx) error
+	FindCurrencyByIdHandler(c *fiber.Ctx) error
 }
 
 func (h *CurrencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
@@ -42,7 +42,7 @@ func (h *CurrencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err := h.CurrencyService.Create(&pgsql.Currency{
+	_, err := h.CurrencyUsecase.Create(&repo.Currency{
 		Name:       currency.Name,
 		Amount:     currency.Amount,
 		Total:      currency.Total,
@@ -59,7 +59,7 @@ func (h *CurrencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-func (h *CurrencyHandler) FindCurrencyByIDHandler(c *fiber.Ctx) error {
+func (h *CurrencyHandler) FindCurrencyByIdHandler(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
@@ -67,7 +67,7 @@ func (h *CurrencyHandler) FindCurrencyByIDHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.CurrencyService.FindOneByID(int64(id))
+	result, err := h.CurrencyUsecase.FindOneById(int64(id))
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
 			"error": "currency not found",

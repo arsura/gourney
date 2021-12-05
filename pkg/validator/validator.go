@@ -28,14 +28,14 @@ func InitValidator() (*gpg_validator.Validate, ut.Translator) {
 	en := en.New()
 	uni := ut.New(en, en)
 	trans, _ := uni.GetTranslator("en")
-	validate := gpg_validator.New()
-	en_translations.RegisterDefaultTranslations(validate, trans)
-	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+	validator := gpg_validator.New()
+	en_translations.RegisterDefaultTranslations(validator, trans)
+	validator.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
 		if name == "-" {
 			return ""
 		}
 		return name
 	})
-	return validate, trans
+	return validator, trans
 }
