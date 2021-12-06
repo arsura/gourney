@@ -30,12 +30,12 @@ func main() {
 				Trans:    trans,
 			},
 			Logger: logger,
-			Conn: pool,
+			Conn:   pool,
 		}
-		api.RunApi()
+		api.Start()
 	}
 
-	// if isRabbitMqEnable ? 
+	// if isRabbitMqEnable ?
 	// if isKafkaEnable ?
 	// if bla bla app enable
 

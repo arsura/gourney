@@ -6,21 +6,21 @@ import (
 
 	handler "github.com/arsura/gourney/cmd/api/handlers"
 	usecase "github.com/arsura/gourney/cmd/usecases"
-	validator "github.com/arsura/gourney/pkg/validator"
 	repo "github.com/arsura/gourney/pkg/repositories"
+	validator "github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"go.uber.org/zap"
 )
 
 type Application struct {
-	Handler 	*handler.Handlers
-	Validator  	*validator.Validator
-	Logger		*zap.SugaredLogger
-	Conn		repo.DbConn
+	Handler   *handler.Handlers
+	Validator *validator.Validator
+	Logger    *zap.SugaredLogger
+	Conn      repo.DbConn
 }
 
-func (app *Application) RunApi() {
+func (app *Application) Start() {
 	server := fiber.New()
 	server.Use(cors.New())
 
