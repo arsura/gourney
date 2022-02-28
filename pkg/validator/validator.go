@@ -24,7 +24,7 @@ func (v *Validator) TransError(err error) []string {
 	return result
 }
 
-func InitValidator() (*gpg_validator.Validate, ut.Translator) {
+func NewValidator() *Validator {
 	en := en.New()
 	uni := ut.New(en, en)
 	trans, _ := uni.GetTranslator("en")
@@ -37,5 +37,5 @@ func InitValidator() (*gpg_validator.Validate, ut.Translator) {
 		}
 		return name
 	})
-	return validator, trans
+	return &Validator{validator, trans}
 }

@@ -9,11 +9,11 @@ services:
     image: gourney
     restart: "no"
     environment:
-      APP_PORT: 8080
+      API_APP_PORT: 8090
       IS_API_ENABLE: 1
-      DATABASE_URL: postgres://admin:admin@gourney-db/gourney
+      DATABASE_URI: postgres://admin:admin@gourney-db/gourney
     ports:
-      - 8080:8080
+      - 8090:8090
     volumes:
       - ../:/app
     networks:
@@ -28,7 +28,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     ports:
-      - 8081:5432
+      - 8091:5432
     networks:
       - gourney
 

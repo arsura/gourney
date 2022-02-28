@@ -19,20 +19,14 @@ import (
 type CurrencyHandlerTestSuite struct {
 	suite.Suite
 	mockUsecase *mocks.MockCurrencyUsecaseProvider
-	handler     *api.CurrencyHandler
+	handler     api.CurrencyHandlerProvider
 	server      *fiber.App
 }
 
 func (suite *CurrencyHandlerTestSuite) SetupTest() {
-	validatr, trans := validator.InitValidator()
+	validator := validator.NewValidator()
 	suite.mockUsecase = new(mocks.MockCurrencyUsecaseProvider)
-	suite.handler = &api.CurrencyHandler{
-		Validator: &validator.Validator{
-			Validate: validatr,
-			Trans:    trans,
-		},
-		CurrencyUsecase: suite.mockUsecase,
-	}
+	suite.handler = api.NewCurrencyHandler(suite.mockUsecase, validator)
 	suite.server = fiber.New()
 	suite.server.Use(func(c *fiber.Ctx) error {
 		return c.Next()

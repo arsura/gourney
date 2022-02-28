@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	handler "github.com/arsura/gourney/cmd/api/handlers"
+	api "github.com/arsura/gourney/cmd/api/handlers"
 	usecase "github.com/arsura/gourney/cmd/usecases"
-	repo "github.com/arsura/gourney/pkg/repositories"
 	validator "github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -14,32 +13,30 @@ import (
 )
 
 type Application struct {
-	Handler   *handler.Handlers
+	Handlers  api.Handlers
 	Validator *validator.Validator
 	Logger    *zap.SugaredLogger
-	DbConn    repo.DbConn
+}
+
+func NewApiApplication(usecases usecase.Usecases, validator *validator.Validator, logger *zap.SugaredLogger) *Application {
+	handlers := api.Handlers{
+		Currencies: api.NewCurrencyHandler(usecases.Currencies, validator),
+	}
+	return &Application{
+		Handlers:  handlers,
+		Validator: validator,
+		Logger:    logger,
+	}
 }
 
 func (app *Application) Start() {
 	server := fiber.New()
 	server.Use(cors.New())
+	app.routes(server)
 
-	api := &Application{
-		Handler: &handler.Handlers{
-			Currencies: &handler.CurrencyHandler{
-				Validator: app.Validator,
-				CurrencyUsecase: &usecase.CurrencyUsecase{
-					Logger:       app.Logger,
-					CurrencyRepo: repo.NewCurrencyRepo(app.DbConn),
-				},
-			},
-		},
-	}
-	api.routes(server)
-
-	port := fmt.Sprintf(":%s", os.Getenv("APP_PORT"))
+	port := fmt.Sprintf(":%s", os.Getenv("API_APP_PORT"))
 	if err := server.Listen(port); err != nil {
-		app.Logger.Errorf("Unable to start server: %v", err)
+		app.Logger.Errorf("unable to start server: %v", err)
 		os.Exit(1)
 	}
 }

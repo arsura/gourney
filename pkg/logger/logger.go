@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func InitLogger() *zap.SugaredLogger {
+func NewLogger() *zap.SugaredLogger {
 	rawJSON := []byte(`{
 		"level": "debug",
 		"encoding": "json",

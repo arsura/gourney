@@ -15,16 +15,13 @@ import (
 type CurrencyUsecaseTestSuite struct {
 	suite.Suite
 	mockRepo *mocks.MockCurrencyRepo
-	usecase  *usecase.CurrencyUsecase
+	usecase  usecase.CurrencyUsecaseProvider
 }
 
 func (suite *CurrencyUsecaseTestSuite) SetupTest() {
 	logger := zaptest.NewLogger(suite.T()).Sugar()
 	suite.mockRepo = new(mocks.MockCurrencyRepo)
-	suite.usecase = &usecase.CurrencyUsecase{
-		Logger:       logger,
-		CurrencyRepo: suite.mockRepo,
-	}
+	suite.usecase = usecase.NewCurrencyUsecase(suite.mockRepo, logger)
 }
 
 func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Success() {

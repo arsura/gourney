@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type CreateReqBody struct {
+type CreateReq struct {
 	Name       string  `json:"name" validate:"required"`
 	Amount     float64 `json:"amount" validate:"required"`
 	Total      float64 `json:"total" validate:"required"`
@@ -18,18 +18,25 @@ type CreateReqBody struct {
 	RiseFactor float64 `json:"rise_factor"`
 }
 
-type CurrencyHandler struct {
-	Validator       *validator.Validator
-	CurrencyUsecase usecase.CurrencyUsecaseProvider
-}
-
 type CurrencyHandlerProvider interface {
 	CreateCurrencyHandler(c *fiber.Ctx) error
 	FindCurrencyByIdHandler(c *fiber.Ctx) error
 }
 
-func (h *CurrencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
-	currency := new(CreateReqBody)
+type currencyHandler struct {
+	CurrencyUsecase usecase.CurrencyUsecaseProvider
+	Validator       *validator.Validator
+}
+
+func NewCurrencyHandler(currencyUsecase usecase.CurrencyUsecaseProvider, validator *validator.Validator) *currencyHandler {
+	return &currencyHandler{
+		CurrencyUsecase: currencyUsecase,
+		Validator:       validator,
+	}
+}
+
+func (h *currencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
+	currency := new(CreateReq)
 	if err := c.BodyParser(currency); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
 			"error": util.UnmarshalErrorParser(err),
@@ -59,7 +66,7 @@ func (h *CurrencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-func (h *CurrencyHandler) FindCurrencyByIdHandler(c *fiber.Ctx) error {
+func (h *currencyHandler) FindCurrencyByIdHandler(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
