@@ -1,4 +1,4 @@
-package api_handler_test
+package api_test
 
 import (
 	"bytes"
@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	handler "github.com/arsura/gourney/cmd/api/handlers"
-	usecase_mock "github.com/arsura/gourney/cmd/usecases/mocks"
-	repo "github.com/arsura/gourney/pkg/repositories"
+	api "github.com/arsura/gourney/cmd/api/handlers"
+	"github.com/arsura/gourney/cmd/usecases/mocks"
+	model "github.com/arsura/gourney/pkg/models/pgsql"
 	"github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
@@ -18,15 +18,15 @@ import (
 
 type CurrencyHandlerTestSuite struct {
 	suite.Suite
-	mockUsecase *usecase_mock.MockCurrencyUsecaseProvider
-	handler     *handler.CurrencyHandler
+	mockUsecase *mocks.MockCurrencyUsecaseProvider
+	handler     *api.CurrencyHandler
 	server      *fiber.App
 }
 
 func (suite *CurrencyHandlerTestSuite) SetupTest() {
 	validatr, trans := validator.InitValidator()
-	suite.mockUsecase = new(usecase_mock.MockCurrencyUsecaseProvider)
-	suite.handler = &handler.CurrencyHandler{
+	suite.mockUsecase = new(mocks.MockCurrencyUsecaseProvider)
+	suite.handler = &api.CurrencyHandler{
 		Validator: &validator.Validator{
 			Validate: validatr,
 			Trans:    trans,
@@ -46,12 +46,12 @@ func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_Created() {
 		"name": "RSI",
 		"amount": 1000,
 		"total": 1000,
-		"riseRate": 0.1,
-		"riseFactor": 10.0
+		"rise_rate": 0.1,
+		"rise_factor": 10.0
 	}`)
 	request := httptest.NewRequest(fiber.MethodPost, "/currencies", bytes.NewReader(currency))
 	request.Header.Set("Content-Type", "application/json")
-	suite.mockUsecase.On("Create", &repo.Currency{
+	suite.mockUsecase.On("Create", &model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -72,8 +72,8 @@ func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_BadRequest_I
 		"name": 100,
 		"amount": 1000,
 		"total": 1000,
-		"riseRate": 0.1,
-		"riseFactor": 10.0
+		"rise_rate": 0.1,
+		"rise_factor": 10.0
 	}`)
 	request := httptest.NewRequest(fiber.MethodPost, "/currencies", bytes.NewReader(currency))
 	request.Header.Set("Content-Type", "application/json")
@@ -87,8 +87,8 @@ func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_BadRequest_M
 	currency := []byte(`{
 		"amount": 1000,
 		"total": 1000,
-		"riseRate": 0.1,
-		"riseFactor": 10.0
+		"rise_rate": 0.1,
+		"rise_factor": 10.0
 	}`)
 	request := httptest.NewRequest(fiber.MethodPost, "/currencies", bytes.NewReader(currency))
 	request.Header.Set("Content-Type", "application/json")
@@ -101,8 +101,8 @@ func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_BadRequest_M
 func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_BadRequest_Missing_Name_Amount() {
 	currency := []byte(`{
 		"total": 1000,
-		"riseRate": 0.1,
-		"riseFactor": 10.0
+		"rise_rate": 0.1,
+		"rise_factor": 10.0
 	}`)
 	request := httptest.NewRequest(fiber.MethodPost, "/currencies", bytes.NewReader(currency))
 	request.Header.Set("Content-Type", "application/json")
@@ -114,7 +114,7 @@ func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_BadRequest_M
 
 func (suite *CurrencyHandlerTestSuite) Test_FindCurrencyById_Handler_Success() {
 	request := httptest.NewRequest(fiber.MethodGet, "/currencies/1", nil)
-	suite.mockUsecase.On("FindOneById", int64(1)).Return(&repo.Currency{
+	suite.mockUsecase.On("FindOneById", int64(1)).Return(&model.Currency{
 		Id:         1,
 		Name:       "RSI",
 		Amount:     1000.0,
@@ -124,7 +124,7 @@ func (suite *CurrencyHandlerTestSuite) Test_FindCurrencyById_Handler_Success() {
 	}, nil)
 	resp, _ := suite.server.Test(request)
 	respBody, _ := ioutil.ReadAll(resp.Body)
-	assert.Equal(suite.T(), []byte(`{"id":1,"name":"RSI","amount":1000,"total":1000,"riseRate":0.1,"riseFactor":10}`), respBody)
+	assert.Equal(suite.T(), []byte(`{"id":1,"name":"RSI","amount":1000,"total":1000,"rise_rate":0.1,"rise_factor":10}`), respBody)
 	assert.Equal(suite.T(), fiber.StatusOK, resp.StatusCode)
 }
 

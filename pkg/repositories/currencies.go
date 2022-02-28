@@ -2,27 +2,24 @@ package repository
 
 import (
 	"context"
+
+	model "github.com/arsura/gourney/pkg/models/pgsql"
 )
 
-type Currency struct {
-	Id         int64   `json:"id"`
-	Name       string  `json:"name"`
-	Amount     float64 `json:"amount"`
-	Total      float64 `json:"total"`
-	RiseRate   float64 `json:"riseRate"`
-	RiseFactor float64 `json:"riseFactor"`
+type CurrencyRepoProvider interface {
+	Create(p *model.Currency) (int64, error)
+	FindOneById(id int64) (*model.Currency, error)
 }
 
-type CurrencyRepo struct {
+type currencyRepo struct {
 	Conn DbConn
 }
 
-type CurrencyRepoProvider interface {
-	Create(p *Currency) (int64, error)
-	FindOneById(id int64) (*Currency, error)
+func NewCurrencyRepo(conn DbConn) *currencyRepo {
+	return &currencyRepo{Conn: conn}
 }
 
-func (db *CurrencyRepo) Create(p *Currency) (int64, error) {
+func (db *currencyRepo) Create(p *model.Currency) (int64, error) {
 	stmt := "INSERT INTO currencies(name, amount, total, rise_rate, rise_factor) VALUES($1, $2, $3, $4, $5)"
 	result, err := db.Conn.Exec(context.Background(), stmt, p.Name, p.Amount, p.Total, p.RiseRate, p.RiseFactor)
 	if err != nil {
@@ -31,8 +28,8 @@ func (db *CurrencyRepo) Create(p *Currency) (int64, error) {
 	return result.RowsAffected(), nil
 }
 
-func (db *CurrencyRepo) FindOneById(id int64) (*Currency, error) {
-	var currency Currency
+func (db *currencyRepo) FindOneById(id int64) (*model.Currency, error) {
+	var currency model.Currency
 	stmt := "SELECT id, name, amount, total, rise_rate, rise_factor FROM currencies WHERE id=$1"
 	err := db.Conn.QueryRow(context.Background(), stmt, id).Scan(
 		&currency.Id,
@@ -43,7 +40,7 @@ func (db *CurrencyRepo) FindOneById(id int64) (*Currency, error) {
 		&currency.RiseFactor,
 	)
 	if err != nil {
-		return &Currency{}, err
+		return &model.Currency{}, err
 	}
 	return &currency, nil
 }

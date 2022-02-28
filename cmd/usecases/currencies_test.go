@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	usecase "github.com/arsura/gourney/cmd/usecases"
-	repo "github.com/arsura/gourney/pkg/repositories"
-	pgsql_mock "github.com/arsura/gourney/pkg/repositories/mocks"
+	model "github.com/arsura/gourney/pkg/models/pgsql"
+	"github.com/arsura/gourney/pkg/repositories/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zaptest"
@@ -14,13 +14,13 @@ import (
 
 type CurrencyUsecaseTestSuite struct {
 	suite.Suite
-	mockRepo *pgsql_mock.MockCurrencyRepo
+	mockRepo *mocks.MockCurrencyRepo
 	usecase  *usecase.CurrencyUsecase
 }
 
 func (suite *CurrencyUsecaseTestSuite) SetupTest() {
 	logger := zaptest.NewLogger(suite.T()).Sugar()
-	suite.mockRepo = new(pgsql_mock.MockCurrencyRepo)
+	suite.mockRepo = new(mocks.MockCurrencyRepo)
 	suite.usecase = &usecase.CurrencyUsecase{
 		Logger:       logger,
 		CurrencyRepo: suite.mockRepo,
@@ -28,14 +28,14 @@ func (suite *CurrencyUsecaseTestSuite) SetupTest() {
 }
 
 func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Success() {
-	suite.mockRepo.On("Create", &repo.Currency{
+	suite.mockRepo.On("Create", &model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}).Return(int64(1), nil)
-	result, err := suite.usecase.Create(&repo.Currency{
+	result, err := suite.usecase.Create(&model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -47,14 +47,14 @@ func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Success() {
 }
 
 func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Failed() {
-	suite.mockRepo.On("Create", &repo.Currency{
+	suite.mockRepo.On("Create", &model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}).Return(int64(0), errors.New("Failed to insert"))
-	result, err := suite.usecase.Create(&repo.Currency{
+	result, err := suite.usecase.Create(&model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -66,7 +66,7 @@ func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Failed() {
 }
 
 func (suite *CurrencyUsecaseTestSuite) Test_FindOneById_Currency_Usecase_Success() {
-	suite.mockRepo.On("FindOneById", int64(1)).Return(&repo.Currency{
+	suite.mockRepo.On("FindOneById", int64(1)).Return(&model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -74,7 +74,7 @@ func (suite *CurrencyUsecaseTestSuite) Test_FindOneById_Currency_Usecase_Success
 		RiseFactor: 10.0,
 	}, nil)
 	result, err := suite.usecase.FindOneById(int64(1))
-	assert.Equal(suite.T(), result, &repo.Currency{
+	assert.Equal(suite.T(), result, &model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,

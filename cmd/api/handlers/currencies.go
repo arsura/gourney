@@ -1,10 +1,10 @@
-package api_handler
+package api
 
 import (
 	"strconv"
 
 	usecase "github.com/arsura/gourney/cmd/usecases"
-	repo "github.com/arsura/gourney/pkg/repositories"
+	model "github.com/arsura/gourney/pkg/models/pgsql"
 	util "github.com/arsura/gourney/pkg/utils"
 	validator "github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
@@ -14,8 +14,8 @@ type CreateReqBody struct {
 	Name       string  `json:"name" validate:"required"`
 	Amount     float64 `json:"amount" validate:"required"`
 	Total      float64 `json:"total" validate:"required"`
-	RiseRate   float64 `json:"riseRate"`
-	RiseFactor float64 `json:"riseFactor"`
+	RiseRate   float64 `json:"rise_rate"`
+	RiseFactor float64 `json:"rise_factor"`
 }
 
 type CurrencyHandler struct {
@@ -42,7 +42,7 @@ func (h *CurrencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err := h.CurrencyUsecase.Create(&repo.Currency{
+	_, err := h.CurrencyUsecase.Create(&model.Currency{
 		Name:       currency.Name,
 		Amount:     currency.Amount,
 		Total:      currency.Total,

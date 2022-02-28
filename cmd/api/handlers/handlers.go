@@ -1,4 +1,4 @@
-package api_handler
+package api
 
 type Handlers struct {
 	Currencies CurrencyHandlerProvider

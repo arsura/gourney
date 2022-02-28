@@ -17,7 +17,7 @@ type Application struct {
 	Handler   *handler.Handlers
 	Validator *validator.Validator
 	Logger    *zap.SugaredLogger
-	Conn      repo.DbConn
+	DbConn    repo.DbConn
 }
 
 func (app *Application) Start() {
@@ -30,7 +30,7 @@ func (app *Application) Start() {
 				Validator: app.Validator,
 				CurrencyUsecase: &usecase.CurrencyUsecase{
 					Logger:       app.Logger,
-					CurrencyRepo: &repo.CurrencyRepo{Conn: app.Conn},
+					CurrencyRepo: repo.NewCurrencyRepo(app.DbConn),
 				},
 			},
 		},

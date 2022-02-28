@@ -4,8 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/arsura/gourney/pkg/repositories"
-	repository_mock "github.com/arsura/gourney/pkg/repositories/mocks"
+	model "github.com/arsura/gourney/pkg/models/pgsql"
+	repository "github.com/arsura/gourney/pkg/repositories"
+	"github.com/arsura/gourney/pkg/repositories/mocks"
 	"github.com/jackc/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -14,13 +15,13 @@ import (
 
 type CurrencyRepoTestSuite struct {
 	suite.Suite
-	mockDbConn *repository_mock.MockDbConn
-	repo       *repository.CurrencyRepo
+	mockDbConn *mocks.MockDbConn
+	repo       repository.CurrencyRepoProvider
 }
 
 func (suite *CurrencyRepoTestSuite) SetupTest() {
-	suite.mockDbConn = new(repository_mock.MockDbConn)
-	suite.repo = &repository.CurrencyRepo{Conn: suite.mockDbConn}
+	suite.mockDbConn = new(mocks.MockDbConn)
+	suite.repo = repository.NewCurrencyRepo(suite.mockDbConn)
 }
 
 func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Success() {
@@ -37,7 +38,7 @@ func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Success() {
 	).Return(pgconn.CommandTag("INSERT 0 1"), nil)
 
 	result, err := suite.repo.Create(
-		&repository.Currency{
+		&model.Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
 			Total:      1000.0,
@@ -63,7 +64,7 @@ func (suite *CurrencyRepoTestSuite) Test_Create_Currency_Repo_Failed() {
 	).Return(nil, errors.New("failed to insert"))
 
 	result, err := suite.repo.Create(
-		&repository.Currency{
+		&model.Currency{
 			Name:       "RSI",
 			Amount:     1000.0,
 			Total:      1000.0,
@@ -111,7 +112,7 @@ func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Success() {
 		Return(nil)
 
 	result, err := suite.repo.FindOneById(1)
-	assert.Equal(suite.T(), result, &repository.Currency{
+	assert.Equal(suite.T(), result, &model.Currency{
 		Id:         1,
 		Name:       "RSI",
 		Amount:     1000.0,
@@ -144,7 +145,7 @@ func (suite *CurrencyRepoTestSuite) Test_FindOne_Currency_Repo_Failed() {
 		Return(errors.New("failed to query"))
 
 	result, err := suite.repo.FindOneById(1)
-	assert.Equal(suite.T(), result, &repository.Currency{})
+	assert.Equal(suite.T(), result, &model.Currency{})
 	assert.NotNil(suite.T(), err)
 }
 

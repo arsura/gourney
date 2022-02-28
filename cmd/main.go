@@ -23,14 +23,14 @@ func main() {
 	}
 	defer pool.Close()
 
-	if isApiEnable, err := strconv.ParseBool(os.Getenv("IS_API_ENABLE")); err == nil && isApiEnable == true {
+	if isApiEnable, err := strconv.ParseBool(os.Getenv("IS_API_ENABLE")); err == nil && isApiEnable {
 		api := &api.Application{
 			Validator: &validator.Validator{
 				Validate: validatr,
 				Trans:    trans,
 			},
 			Logger: logger,
-			Conn:   pool,
+			DbConn: pool,
 		}
 		api.Start()
 	}

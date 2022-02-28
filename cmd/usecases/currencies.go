@@ -1,7 +1,8 @@
 package usecase
 
 import (
-	"github.com/arsura/gourney/pkg/repositories"
+	model "github.com/arsura/gourney/pkg/models/pgsql"
+	repository "github.com/arsura/gourney/pkg/repositories"
 	"go.uber.org/zap"
 )
 
@@ -11,12 +12,12 @@ type CurrencyUsecase struct {
 }
 
 type CurrencyUsecaseProvider interface {
-	Create(c *repository.Currency) (int64, error)
-	FindOneById(id int64) (*repository.Currency, error)
+	Create(c *model.Currency) (int64, error)
+	FindOneById(id int64) (*model.Currency, error)
 }
 
-func (s *CurrencyUsecase) Create(c *repository.Currency) (int64, error) {
-	result, err := s.CurrencyRepo.Create(&repository.Currency{
+func (s *CurrencyUsecase) Create(c *model.Currency) (int64, error) {
+	result, err := s.CurrencyRepo.Create(&model.Currency{
 		Name:       c.Name,
 		Amount:     c.Amount,
 		Total:      c.Total,
@@ -30,7 +31,7 @@ func (s *CurrencyUsecase) Create(c *repository.Currency) (int64, error) {
 	return result, nil
 }
 
-func (s *CurrencyUsecase) FindOneById(id int64) (*repository.Currency, error) {
+func (s *CurrencyUsecase) FindOneById(id int64) (*model.Currency, error) {
 	result, err := s.CurrencyRepo.FindOneById(int64(id))
 	if err != nil {
 		s.Logger.Errorf("Failed to find currency: %v", err)
