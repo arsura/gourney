@@ -34,7 +34,7 @@ func (app *Application) Start() {
 	server.Use(cors.New())
 	app.routes(server)
 
-	port := fmt.Sprintf(":%s", os.Getenv("API_APP_PORT"))
+	port := fmt.Sprintf(":%s", os.Getenv("APP_PORT"))
 	if err := server.Listen(port); err != nil {
 		app.Logger.Errorf("unable to start server: %v", err)
 		os.Exit(1)

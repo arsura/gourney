@@ -1,17 +1,13 @@
 version: "3.8"
 
 services:
-  gourney:
+  gourney-api:
     build:
       context: ../
-      dockerfile: development/Dockerfile.dev
+      dockerfile: development/Dockerfile
     container_name: gourney
     image: gourney
     restart: "no"
-    environment:
-      API_APP_PORT: 8090
-      IS_API_ENABLE: 1
-      DATABASE_URI: postgres://admin:admin@gourney-db/gourney
     ports:
       - 8090:8090
     volumes:

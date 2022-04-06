@@ -4,10 +4,13 @@ migrate-up-dev:
 migrate-down-dev:
 	migrate -path pkg/models/pgsql/migrations -database "postgres://admin:admin@localhost:8081/gourney?sslmode=disable" -verbose down
 
-dev:
+run-dev-docker:
 	docker-compose -f ./development/docker-compose.yml up
 
+clean-docker:
+	docker rm gourney && docker image rm gourney
+
 test:
-	go test -v ./...
+	go clean -testcache && go test -v ./...
 
 .PHONY: migrate-up-dev migrate-down-dev

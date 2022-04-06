@@ -1,11 +1,12 @@
-FROM golang:1.17-alpine
+FROM golang:1.18-alpine
 
 ENV GO111MODULE=on \
   CGO_ENABLED=0 \
   GOOS=linux \
-  GOARCH=amd64
+  GOARCH=amd64 \
+  APP_ENV=development
 
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl git
 
 WORKDIR /app 
 

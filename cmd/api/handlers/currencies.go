@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"strconv"
 
 	usecase "github.com/arsura/gourney/cmd/usecases"
@@ -36,8 +37,9 @@ func NewCurrencyHandler(currencyUsecase usecase.CurrencyUsecaseProvider, validat
 }
 
 func (h *currencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
-	currency := new(CreateReq)
-	if err := c.BodyParser(currency); err != nil {
+	currency := &CreateReq{}
+	err := json.Unmarshal(c.Body(), currency)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
 			"error": util.UnmarshalErrorParser(err),
 		})
@@ -49,7 +51,7 @@ func (h *currencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err := h.CurrencyUsecase.Create(&model.Currency{
+	_, err = h.CurrencyUsecase.Create(&model.Currency{
 		Name:       currency.Name,
 		Amount:     currency.Amount,
 		Total:      currency.Total,

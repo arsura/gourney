@@ -1,0 +1,8 @@
+service:
+  api:
+    port: 8090
+    is_enable: true
+
+database:
+  postgres:
+    uri: postgres://admin:admin@gourney-db/gourney
