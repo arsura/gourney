@@ -1,8 +1,8 @@
 migrate-up-dev:
-	migrate -path pkg/models/pgsql/migrations -database "postgres://admin:admin@localhost:8081/gourney?sslmode=disable" -verbose up
+	migrate -path pkg/models/pgsql/migrations -database "postgres://admin:admin@localhost:8091/gourney?sslmode=disable" -verbose up
 
 migrate-down-dev:
-	migrate -path pkg/models/pgsql/migrations -database "postgres://admin:admin@localhost:8081/gourney?sslmode=disable" -verbose down
+	migrate -path pkg/models/pgsql/migrations -database "postgres://admin:admin@localhost:8091/gourney?sslmode=disable" -verbose down
 
 run-dev-docker:
 	docker-compose -f ./development/docker-compose.yml up

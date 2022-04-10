@@ -1,6 +1,7 @@
 package usecase_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -16,12 +17,14 @@ type CurrencyUsecaseTestSuite struct {
 	suite.Suite
 	mockRepo *mocks.MockCurrencyRepo
 	usecase  usecase.CurrencyUsecaseProvider
+	ctx      context.Context
 }
 
 func (suite *CurrencyUsecaseTestSuite) SetupTest() {
 	logger := zaptest.NewLogger(suite.T()).Sugar()
 	suite.mockRepo = new(mocks.MockCurrencyRepo)
 	suite.usecase = usecase.NewCurrencyUsecase(suite.mockRepo, logger)
+	suite.ctx = context.Background()
 }
 
 func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Success() {
@@ -32,7 +35,7 @@ func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Success() {
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}).Return(int64(1), nil)
-	result, err := suite.usecase.Create(&model.Currency{
+	result, err := suite.usecase.Create(suite.ctx, &model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -51,7 +54,7 @@ func (suite *CurrencyUsecaseTestSuite) Test_Create_Currency_Usecase_Failed() {
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}).Return(int64(0), errors.New("Failed to insert"))
-	result, err := suite.usecase.Create(&model.Currency{
+	result, err := suite.usecase.Create(suite.ctx, &model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
 		Total:      1000.0,
@@ -70,7 +73,7 @@ func (suite *CurrencyUsecaseTestSuite) Test_FindOneById_Currency_Usecase_Success
 		RiseRate:   0.1,
 		RiseFactor: 10.0,
 	}, nil)
-	result, err := suite.usecase.FindOneById(int64(1))
+	result, err := suite.usecase.FindOneById(suite.ctx, int64(1))
 	assert.Equal(suite.T(), result, &model.Currency{
 		Name:       "RSI",
 		Amount:     1000.0,
@@ -83,7 +86,7 @@ func (suite *CurrencyUsecaseTestSuite) Test_FindOneById_Currency_Usecase_Success
 
 func (suite *CurrencyUsecaseTestSuite) Test_FindOneById_Currency_Usecase_Failed() {
 	suite.mockRepo.On("FindOneById", int64(1)).Return(nil, errors.New("failed to find currency"))
-	result, err := suite.usecase.FindOneById(int64(1))
+	result, err := suite.usecase.FindOneById(suite.ctx, int64(1))
 	assert.Nil(suite.T(), result)
 	assert.NotNil(suite.T(), err)
 }

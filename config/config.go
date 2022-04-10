@@ -13,7 +13,7 @@ type Config struct {
 }
 
 type APIServer struct {
-	Port     int32
+	Port     string
 	IsEnable bool
 }
 
@@ -37,7 +37,7 @@ func NewConfig() *Config {
 	return &Config{
 		PostgresURI: viper.GetString("database.postgres.uri"),
 		APIServer: APIServer{
-			Port:     viper.GetInt32("service.api.port"),
+			Port:     viper.GetString("service.api.port"),
 			IsEnable: viper.GetBool("service.api.is_enable"),
 		},
 	}

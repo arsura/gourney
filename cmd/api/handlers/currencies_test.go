@@ -12,8 +12,10 @@ import (
 	model "github.com/arsura/gourney/pkg/models/pgsql"
 	"github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap/zaptest"
 )
 
 type CurrencyHandlerTestSuite struct {
@@ -25,12 +27,14 @@ type CurrencyHandlerTestSuite struct {
 
 func (suite *CurrencyHandlerTestSuite) SetupTest() {
 	validator := validator.NewValidator()
+	logger := zaptest.NewLogger(suite.T()).Sugar()
 	suite.mockUsecase = new(mocks.MockCurrencyUsecaseProvider)
-	suite.handler = api.NewCurrencyHandler(suite.mockUsecase, validator)
+	suite.handler = api.NewCurrencyHandler(suite.mockUsecase, validator, logger)
 	suite.server = fiber.New()
 	suite.server.Use(func(c *fiber.Ctx) error {
 		return c.Next()
 	})
+	suite.server.Use(requestid.New())
 	suite.server.Post("/currencies", suite.handler.CreateCurrencyHandler)
 	suite.server.Get("/currencies/:id", suite.handler.FindCurrencyByIdHandler)
 }
@@ -89,7 +93,7 @@ func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_BadRequest_M
 	resp, _ := suite.server.Test(request)
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	assert.Equal(suite.T(), fiber.StatusBadRequest, resp.StatusCode)
-	assert.Equal(suite.T(), []byte(`{"errors":["name is a required field"]}`), respBody)
+	assert.Equal(suite.T(), []byte(`{"error":["name is a required field"]}`), respBody)
 }
 
 func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_BadRequest_Missing_Name_Amount() {
@@ -103,7 +107,7 @@ func (suite *CurrencyHandlerTestSuite) Test_Create_Currency_Handler_BadRequest_M
 	resp, _ := suite.server.Test(request)
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	assert.Equal(suite.T(), fiber.StatusBadRequest, resp.StatusCode)
-	assert.Equal(suite.T(), []byte(`{"errors":["name is a required field","amount is a required field"]}`), respBody)
+	assert.Equal(suite.T(), []byte(`{"error":["name is a required field","amount is a required field"]}`), respBody)
 }
 
 func (suite *CurrencyHandlerTestSuite) Test_FindCurrencyById_Handler_Success() {

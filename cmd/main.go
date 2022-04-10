@@ -34,7 +34,7 @@ func main() {
 	}
 
 	if isApiEnable := config.APIServer.IsEnable; isApiEnable {
-		apiApp := api.NewApiApplication(usercases, validator, logger)
+		apiApp := api.NewApiApplication(usercases, validator, logger, config)
 		apiApp.Start()
 	}
 

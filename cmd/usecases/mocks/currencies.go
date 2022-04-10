@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	"context"
+
 	model "github.com/arsura/gourney/pkg/models/pgsql"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -13,7 +15,7 @@ type MockCurrencyUsecaseProvider struct {
 }
 
 // Create provides a mock function with given fields: c
-func (_m *MockCurrencyUsecaseProvider) Create(c *model.Currency) (int64, error) {
+func (_m *MockCurrencyUsecaseProvider) Create(ctx context.Context, c *model.Currency) (int64, error) {
 	ret := _m.Called(c)
 
 	var r0 int64
@@ -34,7 +36,7 @@ func (_m *MockCurrencyUsecaseProvider) Create(c *model.Currency) (int64, error) 
 }
 
 // FindOneById provides a mock function with given fields: id
-func (_m *MockCurrencyUsecaseProvider) FindOneById(id int64) (*model.Currency, error) {
+func (_m *MockCurrencyUsecaseProvider) FindOneById(ctx context.Context, id int64) (*model.Currency, error) {
 	ret := _m.Called(id)
 
 	var r0 *model.Currency

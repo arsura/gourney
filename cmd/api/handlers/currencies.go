@@ -1,14 +1,17 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 
 	usecase "github.com/arsura/gourney/cmd/usecases"
+	"github.com/arsura/gourney/pkg/constant"
 	model "github.com/arsura/gourney/pkg/models/pgsql"
 	util "github.com/arsura/gourney/pkg/utils"
 	validator "github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 )
 
 type CreateReq struct {
@@ -25,19 +28,26 @@ type CurrencyHandlerProvider interface {
 }
 
 type currencyHandler struct {
-	CurrencyUsecase usecase.CurrencyUsecaseProvider
-	Validator       *validator.Validator
+	currencyUsecase usecase.CurrencyUsecaseProvider
+	validator       *validator.Validator
+	logger          *zap.SugaredLogger
 }
 
-func NewCurrencyHandler(currencyUsecase usecase.CurrencyUsecaseProvider, validator *validator.Validator) *currencyHandler {
+func NewCurrencyHandler(currencyUsecase usecase.CurrencyUsecaseProvider, validator *validator.Validator, logger *zap.SugaredLogger) *currencyHandler {
 	return &currencyHandler{
-		CurrencyUsecase: currencyUsecase,
-		Validator:       validator,
+		currencyUsecase: currencyUsecase,
+		validator:       validator,
+		logger:          logger,
 	}
 }
 
 func (h *currencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
-	currency := &CreateReq{}
+	var (
+		currency  = &CreateReq{}
+		requestId = c.Locals("requestid").(string)
+		ctx       = context.WithValue(c.UserContext(), constant.RequestIdKey, requestId)
+	)
+
 	err := json.Unmarshal(c.Body(), currency)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
@@ -45,13 +55,13 @@ func (h *currencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.Validator.Validate.Struct(*currency); err != nil {
+	if err := h.validator.Validate.Struct(*currency); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
-			"errors": h.Validator.TransError(err),
+			"error": h.validator.TransError(err),
 		})
 	}
 
-	_, err = h.CurrencyUsecase.Create(&model.Currency{
+	_, err = h.currencyUsecase.Create(ctx, &model.Currency{
 		Name:       currency.Name,
 		Amount:     currency.Amount,
 		Total:      currency.Total,
@@ -69,6 +79,11 @@ func (h *currencyHandler) CreateCurrencyHandler(c *fiber.Ctx) error {
 }
 
 func (h *currencyHandler) FindCurrencyByIdHandler(c *fiber.Ctx) error {
+	var (
+		requestId = c.Locals("requestid").(string)
+		ctx       = context.WithValue(c.UserContext(), constant.RequestIdKey, requestId)
+	)
+
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
@@ -76,7 +91,7 @@ func (h *currencyHandler) FindCurrencyByIdHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.CurrencyUsecase.FindOneById(int64(id))
+	result, err := h.currencyUsecase.FindOneById(ctx, int64(id))
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
 			"error": "currency not found",

@@ -1,27 +1,34 @@
 package usecase
 
 import (
+	"context"
+
+	"github.com/arsura/gourney/pkg/constant"
 	model "github.com/arsura/gourney/pkg/models/pgsql"
 	repository "github.com/arsura/gourney/pkg/repositories"
 	"go.uber.org/zap"
 )
 
 type CurrencyUsecaseProvider interface {
-	Create(c *model.Currency) (int64, error)
-	FindOneById(id int64) (*model.Currency, error)
+	Create(ctx context.Context, c *model.Currency) (int64, error)
+	FindOneById(ctx context.Context, id int64) (*model.Currency, error)
 }
 
 type currencyUsecase struct {
-	CurrencyRepo repository.CurrencyRepoProvider
-	Logger       *zap.SugaredLogger
+	currencyRepository repository.CurrencyRepoProvider
+	logger             *zap.SugaredLogger
 }
 
 func NewCurrencyUsecase(repo repository.CurrencyRepoProvider, logger *zap.SugaredLogger) *currencyUsecase {
-	return &currencyUsecase{CurrencyRepo: repo, Logger: logger}
+	return &currencyUsecase{currencyRepository: repo, logger: logger}
 }
 
-func (s *currencyUsecase) Create(c *model.Currency) (int64, error) {
-	result, err := s.CurrencyRepo.Create(&model.Currency{
+func (u *currencyUsecase) Create(ctx context.Context, c *model.Currency) (int64, error) {
+	var (
+		requestId = ctx.Value(constant.RequestIdKey)
+	)
+
+	result, err := u.currencyRepository.Create(&model.Currency{
 		Name:       c.Name,
 		Amount:     c.Amount,
 		Total:      c.Total,
@@ -29,16 +36,20 @@ func (s *currencyUsecase) Create(c *model.Currency) (int64, error) {
 		RiseFactor: c.RiseFactor,
 	})
 	if err != nil {
-		s.Logger.Errorf("failed to create currency: %v", err)
+		u.logger.Errorw("failed to create currency", zap.Any("request_id", requestId), zap.Any("error", err))
 		return 0, err
 	}
 	return result, nil
 }
 
-func (s *currencyUsecase) FindOneById(id int64) (*model.Currency, error) {
-	result, err := s.CurrencyRepo.FindOneById(int64(id))
+func (u *currencyUsecase) FindOneById(ctx context.Context, id int64) (*model.Currency, error) {
+	var (
+		requestId = ctx.Value(constant.RequestIdKey)
+	)
+
+	result, err := u.currencyRepository.FindOneById(int64(id))
 	if err != nil {
-		s.Logger.Errorf("failed to find currency: %v", err)
+		u.logger.Errorw("failed to find currency", zap.Any("request_id", requestId), zap.Any("error", err))
 		return nil, err
 	}
 	return result, nil
