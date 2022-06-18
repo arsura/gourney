@@ -1,16 +1,13 @@
 package main
 
 import (
-	"context"
-	"fmt"
-
 	api "github.com/arsura/gourney/cmd/api"
 	usecase "github.com/arsura/gourney/cmd/usecases"
 	"github.com/arsura/gourney/config"
+	adapter "github.com/arsura/gourney/pkg/adapters"
 	"github.com/arsura/gourney/pkg/logger"
 	repository "github.com/arsura/gourney/pkg/repositories"
 	"github.com/arsura/gourney/pkg/validator"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 func main() {
@@ -18,23 +15,20 @@ func main() {
 	logger := logger.NewLogger()
 	validator := validator.NewValidator()
 	config := config.NewConfig()
+	mongoClient := adapter.NewMongoDBClient(config)
 
-	pool, err := pgxpool.Connect(context.Background(), config.PostgresURI)
-	if err != nil {
-		panic(fmt.Errorf("unable to connect database: %w", err))
-	}
-	defer pool.Close()
-
+	postRepository := repository.NewPostRepository(mongoClient, logger, config)
 	repositories := repository.Repositories{
-		Currencies: repository.NewCurrencyRepo(pool),
+		Posts: postRepository,
 	}
 
-	usercases := usecase.Usecases{
-		Currencies: usecase.NewCurrencyUsecase(repositories.Currencies, logger),
+	postUsecase := usecase.NewPostUsecase(&repositories, logger)
+	usecases := usecase.Usecases{
+		Post: postUsecase,
 	}
 
 	if isApiEnable := config.APIServer.IsEnable; isApiEnable {
-		apiApp := api.NewApiApplication(usercases, validator, logger, config)
+		apiApp := api.NewApiApplication(usecases, validator, logger, config)
 		apiApp.Start()
 	}
 

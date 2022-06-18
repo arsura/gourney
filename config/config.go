@@ -7,14 +7,38 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct {
-	PostgresURI string
-	APIServer
-}
-
 type APIServer struct {
 	Port     string
 	IsEnable bool
+}
+
+type BlogCollections struct {
+	Posts string
+}
+
+type BlogDatabase struct {
+	Name        string
+	Collections BlogCollections
+}
+
+type LogCollections struct {
+	Logs string
+}
+
+type LogDatabase struct {
+	Name        string
+	Collections LogCollections
+}
+
+type MongoDB struct {
+	URI string
+	BlogDatabase
+	LogDatabase
+}
+
+type Config struct {
+	APIServer
+	MongoDB
 }
 
 func NewConfig() *Config {
@@ -26,19 +50,33 @@ func NewConfig() *Config {
 		viper.SetConfigType("yaml")
 		viper.AddConfigPath("config")
 	default:
-		panic(fmt.Errorf("env is undefined"))
+		panic(fmt.Errorf("APP_ENV must not be undefined"))
 	}
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("failed to read config file: %v", err))
+		panic(fmt.Errorf("failed to read config file, %v", err))
 	}
 
 	return &Config{
-		PostgresURI: viper.GetString("database.postgres.uri"),
 		APIServer: APIServer{
 			Port:     viper.GetString("service.api.port"),
-			IsEnable: viper.GetBool("service.api.is_enable"),
+			IsEnable: viper.GetBool("service.api.enable"),
+		},
+		MongoDB: MongoDB{
+			URI: viper.GetString("database.mongodb.uri"),
+			BlogDatabase: BlogDatabase{
+				Name: viper.GetString("database.mongodb.databases.blog"),
+				Collections: BlogCollections{
+					Posts: viper.GetString("database.mongodb.collections.posts"),
+				},
+			},
+			LogDatabase: LogDatabase{
+				Name: viper.GetString("database.mongodb.databases.log"),
+				Collections: LogCollections{
+					Logs: viper.GetString("database.mongodb.collections.logs"),
+				},
+			},
 		},
 	}
 }

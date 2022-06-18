@@ -1,9 +1,3 @@
-migrate-up-dev:
-	migrate -path pkg/models/pgsql/migrations -database "postgres://admin:admin@localhost:8091/gourney?sslmode=disable" -verbose up
-
-migrate-down-dev:
-	migrate -path pkg/models/pgsql/migrations -database "postgres://admin:admin@localhost:8091/gourney?sslmode=disable" -verbose down
-
 run-dev-docker:
 	docker-compose -f ./development/docker-compose.yml up
 
@@ -12,5 +6,8 @@ clean-docker:
 
 test:
 	go clean -testcache && go test -v ./...
+
+dev: 
+	nodemon --exec APP_ENV=development go run cmd/main.go --signal SIGTERM
 
 .PHONY: migrate-up-dev migrate-down-dev

@@ -1,8 +1,14 @@
 service:
   api:
     port: "8090"
-    is_enable: true
+    enable: true
 
 database:
-  postgres:
-    uri: postgres://admin:admin@gourney-db/gourney
+  mongodb:
+    uri: mongodb://localhost:27017
+    databases: 
+      blog: "blog"
+      log: "log"
+    collections:
+      posts: "posts"
+      logs: "logs"

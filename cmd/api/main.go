@@ -24,7 +24,7 @@ type Application struct {
 
 func NewApiApplication(usecases usecase.Usecases, validator *validator.Validator, logger *zap.SugaredLogger, config *config.Config) *Application {
 	handlers := api.Handlers{
-		Currencies: api.NewCurrencyHandler(usecases.Currencies, validator, logger),
+		Post: api.NewPostHandler(usecases.Post, validator, logger),
 	}
 	return &Application{
 		Handlers:  handlers,

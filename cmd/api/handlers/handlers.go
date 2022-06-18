@@ -1,5 +1,5 @@
 package api
 
 type Handlers struct {
-	Currencies CurrencyHandlerProvider
+	Post PostHandlerProvider
 }
