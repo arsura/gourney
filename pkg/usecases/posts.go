@@ -3,9 +3,11 @@ package usecase
 import (
 	"context"
 
+	adapter "github.com/arsura/gourney/pkg/adapters"
 	"github.com/arsura/gourney/pkg/constant"
 	model "github.com/arsura/gourney/pkg/models/mongodb"
 	repository "github.com/arsura/gourney/pkg/repositories"
+	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
@@ -18,12 +20,13 @@ type PostUsecaseProvider interface {
 }
 
 type postUsecase struct {
-	repositories *repository.Repositories
-	logger       *zap.SugaredLogger
+	repositories       *repository.Repositories
+	rabbitMqConnection *adapter.RabbitMQConnection
+	logger             *zap.SugaredLogger
 }
 
-func NewPostUsecase(repositories *repository.Repositories, logger *zap.SugaredLogger) *postUsecase {
-	return &postUsecase{repositories, logger}
+func NewPostUsecase(repositories *repository.Repositories, rabbitMqConnection *adapter.RabbitMQConnection, logger *zap.SugaredLogger) *postUsecase {
+	return &postUsecase{repositories, rabbitMqConnection, logger}
 }
 
 func (u *postUsecase) CreatePost(ctx context.Context, post *model.Post) (*primitive.ObjectID, error) {
@@ -32,8 +35,21 @@ func (u *postUsecase) CreatePost(ctx context.Context, post *model.Post) (*primit
 		Content: post.Content,
 	})
 	if err != nil {
-		u.logger.With("error", err, "tracking_id", ctx.Value(constant.RequestIdKey)).Errorf("failed to create post")
+		u.logger.With("event", "create_post", "error", err, "tracking_id", ctx.Value(constant.RequestIdKey)).Errorf("failed to create post")
 		return nil, err
+	}
+
+	err = u.rabbitMqConnection.Channel.Publish(
+		"",                                     // exchange
+		u.rabbitMqConnection.Queues.Hello.Name, // routing key
+		false,                                  // mandatory
+		false,                                  // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte("Hi There!"),
+		})
+	if err != nil {
+		u.logger.With("event", "create_post", "error", err, "tracking_id", ctx.Value(constant.RequestIdKey)).Errorf("failed to publish create post log event")
 	}
 
 	return id, nil

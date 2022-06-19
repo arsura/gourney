@@ -1,10 +1,10 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 type APIServer struct {
@@ -36,26 +36,36 @@ type MongoDB struct {
 	LogDatabase
 }
 
+type Queues struct {
+	Hello string
+}
+
+type RabbitMQ struct {
+	URI string
+	Queues
+}
+
 type Config struct {
 	APIServer
 	MongoDB
+	RabbitMQ
 }
 
-func NewConfig() *Config {
+func NewConfig(logger *zap.SugaredLogger) *Config {
 	env := os.Getenv("APP_ENV")
 
 	switch env {
 	case "development":
 		viper.SetConfigName("local.config")
 		viper.SetConfigType("yaml")
-		viper.AddConfigPath("config")
+		viper.AddConfigPath("configs")
 	default:
-		panic(fmt.Errorf("APP_ENV must not be undefined"))
+		logger.Panic("APP_ENV must not be undefined")
 	}
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("failed to read config file, %v", err))
+		logger.With("error", err).Panic("failed to read config file")
 	}
 
 	return &Config{
@@ -76,6 +86,12 @@ func NewConfig() *Config {
 				Collections: LogCollections{
 					Logs: viper.GetString("database.mongodb.collections.logs"),
 				},
+			},
+		},
+		RabbitMQ: RabbitMQ{
+			URI: viper.GetString("broker.rabbitmq.uri"),
+			Queues: Queues{
+				Hello: viper.GetString("broker.rabbitmq.queues.hello"),
 			},
 		},
 	}

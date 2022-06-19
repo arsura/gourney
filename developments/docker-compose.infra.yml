@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  gourney-mongo:
+    image: mongo:4.4
+    container_name: gourney-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./mongo-data:/data/db
+
+  gourney-rabbitmq:
+    image: rabbitmq:3.10-management
+    container_name: gourney-rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
+
+networks:
+  gourney: null

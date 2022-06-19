@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	usecase "github.com/arsura/gourney/cmd/usecases"
 	"github.com/arsura/gourney/pkg/constant"
 	model "github.com/arsura/gourney/pkg/models/mongodb"
+	usecase "github.com/arsura/gourney/pkg/usecases"
 	util "github.com/arsura/gourney/pkg/utils"
 	validator "github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"

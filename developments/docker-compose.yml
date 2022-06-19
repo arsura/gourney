@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  gourney-api:
+    build:
+      context: ../
+      dockerfile: development/Dockerfile.api
+    container_name: gourney
+    image: gourney
+    restart: "no"
+    ports:
+      - 8090:8090
+    volumes:
+      - ../:/app
+    networks:
+      - gourney
+      
+networks:
+  gourney: null

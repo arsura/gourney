@@ -1,0 +1,20 @@
+service:
+  api:
+    port: "8090"
+    enable: true
+
+database:
+  mongodb:
+    uri: mongodb://localhost:27017
+    databases:
+      blog: "blog"
+      log: "log"
+    collections:
+      posts: "posts"
+      logs: "logs"
+
+broker:
+  rabbitmq:
+    uri: amqp://root:root@localhost:5672/
+    queues: 
+      hello: "hello"

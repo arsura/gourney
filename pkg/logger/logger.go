@@ -9,7 +9,7 @@ import (
 func NewLogger() *zap.SugaredLogger {
 	logger, err := zap.NewProduction()
 	if err != nil {
-		panic(fmt.Errorf("failed to build logger: %w", err))
+		panic(fmt.Errorf("failed to new logger: %w", err))
 	}
 	return logger.Sugar()
 }

@@ -6,8 +6,8 @@ import (
 
 	api "github.com/arsura/gourney/cmd/api/handlers"
 	middleware "github.com/arsura/gourney/cmd/api/middlewares"
-	usecase "github.com/arsura/gourney/cmd/usecases"
-	"github.com/arsura/gourney/config"
+	config "github.com/arsura/gourney/configs"
+	usecase "github.com/arsura/gourney/pkg/usecases"
 	validator "github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

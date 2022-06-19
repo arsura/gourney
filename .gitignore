@@ -16,6 +16,7 @@
 
 tmp
 logs
-.env
 config/local.config.yml
+developments/mongo-data/
+.env
 .vscode

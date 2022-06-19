@@ -5,10 +5,16 @@ service:
 
 database:
   mongodb:
-    uri: mongodb://localhost:27017
+    uri: mongodb://root:root@localhost:27018/?authSource=admin
     databases: 
       blog: "blog"
       log: "log"
     collections:
       posts: "posts"
       logs: "logs"
+
+broker:
+  rabbitmq:
+    uri: amqp://root:root@localhost:5672/
+    queues: 
+      hello: "hello"

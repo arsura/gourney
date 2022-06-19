@@ -1,5 +1,11 @@
-run-dev-docker:
-	docker-compose -f ./development/docker-compose.yml up
+dev: 
+	nodemon --exec APP_ENV=development go run cmd/main.go --signal SIGTERM
+
+dev-docker:
+	docker-compose -f ./development/docker-compose.yml up -d
+
+dev-docker-infra:
+	docker-compose -f ./development/docker-compose.infra.yml up -d
 
 clean-docker:
 	docker rm gourney && docker image rm gourney
@@ -7,7 +13,6 @@ clean-docker:
 test:
 	go clean -testcache && go test -v ./...
 
-dev: 
-	nodemon --exec APP_ENV=development go run cmd/main.go --signal SIGTERM
+
 
 .PHONY: migrate-up-dev migrate-down-dev
