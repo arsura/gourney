@@ -44,7 +44,7 @@ func NewPostHandler(postUsecase usecase.PostUsecaseProvider, validator *validato
 func (h *postHandler) FindPostByIdHandler(c *fiber.Ctx) error {
 	var (
 		requestId = c.Locals("requestid").(string)
-		ctx       = context.WithValue(c.UserContext(), constant.RequestIdKey, requestId)
+		ctx       = context.WithValue(c.UserContext(), constant.REQUEST_ID_KEY, requestId)
 	)
 
 	id, err := util.StringToObjectId(c.Params("id"))
@@ -68,7 +68,7 @@ func (h *postHandler) CreatePostHandler(c *fiber.Ctx) error {
 	var (
 		post      = &CreatePostReqBody{}
 		requestId = c.Locals("requestid").(string)
-		ctx       = context.WithValue(c.UserContext(), constant.RequestIdKey, requestId)
+		ctx       = context.WithValue(c.UserContext(), constant.REQUEST_ID_KEY, requestId)
 	)
 
 	err := json.Unmarshal(c.Body(), post)
@@ -102,7 +102,7 @@ func (h *postHandler) UpdatePostByIdHandler(c *fiber.Ctx) error {
 	var (
 		post      = &UpdatePostReqBody{}
 		requestId = c.Locals("requestid").(string)
-		ctx       = context.WithValue(c.UserContext(), constant.RequestIdKey, requestId)
+		ctx       = context.WithValue(c.UserContext(), constant.REQUEST_ID_KEY, requestId)
 	)
 
 	err := json.Unmarshal(c.Body(), post)
@@ -142,7 +142,7 @@ func (h *postHandler) UpdatePostByIdHandler(c *fiber.Ctx) error {
 func (h *postHandler) DeletePostByIdHandler(c *fiber.Ctx) error {
 	var (
 		requestId = c.Locals("requestid").(string)
-		ctx       = context.WithValue(c.UserContext(), constant.RequestIdKey, requestId)
+		ctx       = context.WithValue(c.UserContext(), constant.REQUEST_ID_KEY, requestId)
 	)
 
 	id, err := util.StringToObjectId(c.Params("id"))

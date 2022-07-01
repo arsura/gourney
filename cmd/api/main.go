@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"os"
 
 	api "github.com/arsura/gourney/cmd/api/handlers"
 	middleware "github.com/arsura/gourney/cmd/api/middlewares"
@@ -16,22 +15,17 @@ import (
 )
 
 type Application struct {
-	Handlers  api.Handlers
+	Handlers  *api.Handlers
 	Validator *validator.Validator
 	Logger    *zap.SugaredLogger
 	Config    *config.Config
 }
 
-func NewApiApplication(usecases usecase.Usecases, validator *validator.Validator, logger *zap.SugaredLogger, config *config.Config) *Application {
-	handlers := api.Handlers{
+func NewApiApplication(usecases *usecase.Usecase, validator *validator.Validator, logger *zap.SugaredLogger, config *config.Config) *Application {
+	handlers := &api.Handlers{
 		Post: api.NewPostHandler(usecases.Post, validator, logger),
 	}
-	return &Application{
-		Handlers:  handlers,
-		Validator: validator,
-		Logger:    logger,
-		Config:    config,
-	}
+	return &Application{handlers, validator, logger, config}
 }
 
 func (app *Application) Start() {
@@ -41,9 +35,8 @@ func (app *Application) Start() {
 	server.Use(middleware.RequestLogging())
 	app.routes(server)
 
-	port := fmt.Sprintf(":%s", app.Config.APIServer.Port)
+	port := fmt.Sprintf(":%s", app.Config.APIService.Port)
 	if err := server.Listen(port); err != nil {
-		app.Logger.Errorf("unable to start server: %v", err)
-		os.Exit(1)
+		app.Logger.With("error", err).Panic("unable to start server")
 	}
 }

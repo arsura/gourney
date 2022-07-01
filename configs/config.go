@@ -7,7 +7,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type APIServer struct {
+type LogsWorkerService struct {
+	IsEnable bool
+}
+
+type APIService struct {
 	Port     string
 	IsEnable bool
 }
@@ -22,7 +26,7 @@ type BlogDatabase struct {
 }
 
 type LogCollections struct {
-	Logs string
+	PostLogs string
 }
 
 type LogDatabase struct {
@@ -36,23 +40,35 @@ type MongoDB struct {
 	LogDatabase
 }
 
-type Queues struct {
-	Hello string
+type Exchanges struct {
+	LogsTopic string
 }
 
 type RabbitMQ struct {
 	URI string
-	Queues
+	Exchanges
 }
 
 type Config struct {
-	APIServer
+	APIService
+	LogsWorkerService
 	MongoDB
 	RabbitMQ
 }
 
 func NewConfig(logger *zap.SugaredLogger) *Config {
 	env := os.Getenv("APP_ENV")
+	viper.AutomaticEnv()
+
+	err := viper.BindEnv("service.api.enable", "ENABLE_API")
+	if err != nil {
+		logger.With("error", err).Panic("failed to bind ENABLE_API env")
+	}
+
+	err = viper.BindEnv("service.worker.enable", "ENABLE_WORKER")
+	if err != nil {
+		logger.With("error", err).Panic("failed to bind ENABLE_WORKER env")
+	}
 
 	switch env {
 	case "development":
@@ -63,15 +79,18 @@ func NewConfig(logger *zap.SugaredLogger) *Config {
 		logger.Panic("APP_ENV must not be undefined")
 	}
 
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	if err != nil {
 		logger.With("error", err).Panic("failed to read config file")
 	}
 
 	return &Config{
-		APIServer: APIServer{
+		APIService: APIService{
 			Port:     viper.GetString("service.api.port"),
 			IsEnable: viper.GetBool("service.api.enable"),
+		},
+		LogsWorkerService: LogsWorkerService{
+			IsEnable: viper.GetBool("service.worker.enable"),
 		},
 		MongoDB: MongoDB{
 			URI: viper.GetString("database.mongodb.uri"),
@@ -84,14 +103,14 @@ func NewConfig(logger *zap.SugaredLogger) *Config {
 			LogDatabase: LogDatabase{
 				Name: viper.GetString("database.mongodb.databases.log"),
 				Collections: LogCollections{
-					Logs: viper.GetString("database.mongodb.collections.logs"),
+					PostLogs: viper.GetString("database.mongodb.collections.post_logs"),
 				},
 			},
 		},
 		RabbitMQ: RabbitMQ{
 			URI: viper.GetString("broker.rabbitmq.uri"),
-			Queues: Queues{
-				Hello: viper.GetString("broker.rabbitmq.queues.hello"),
+			Exchanges: Exchanges{
+				LogsTopic: viper.GetString("broker.rabbitmq.exchanges.logs_topic"),
 			},
 		},
 	}

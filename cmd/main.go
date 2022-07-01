@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 
-	api "github.com/arsura/gourney/cmd/api"
+	"github.com/arsura/gourney/cmd/api"
+	"github.com/arsura/gourney/cmd/logsworker"
 	config "github.com/arsura/gourney/configs"
 	adapter "github.com/arsura/gourney/pkg/adapters"
 	"github.com/arsura/gourney/pkg/logger"
 	repository "github.com/arsura/gourney/pkg/repositories"
+	service "github.com/arsura/gourney/pkg/services"
 	usecase "github.com/arsura/gourney/pkg/usecases"
 	"github.com/arsura/gourney/pkg/validator"
 )
@@ -19,35 +21,45 @@ func main() {
 		validator          = validator.NewValidator()
 		config             = config.NewConfig(logger)
 		mongoClient        = adapter.NewMongoDBClient(logger, config)
-		rabbitMqConnection = adapter.NewRabbitMQConnection(logger, config)
+		rabbitMQConnection = adapter.NewRabbitMQConnection(logger, config)
 	)
 
-	var (
-		postRepository = repository.NewPostRepository(mongoClient, logger, config)
+	defer mongoClient.Disconnect(context.Background())
+	defer rabbitMQConnection.Connection.Close()
+	defer rabbitMQConnection.Channel.Close()
 
-		repositories = repository.Repositories{
-			Posts: postRepository,
+	var (
+		postRepository    = repository.NewPostRepository(mongoClient, logger, config)
+		postLogRepository = repository.NewPostLogRepository(mongoClient, logger, config)
+		repositories      = &repository.Repository{
+			Post:    postRepository,
+			PostLog: postLogRepository,
 		}
 	)
 
 	var (
-		postUsecase = usecase.NewPostUsecase(&repositories, rabbitMqConnection, logger)
-
-		usecases = usecase.Usecases{
-			Post: postUsecase,
+		logService = service.NewLogService(rabbitMQConnection, logger, config)
+		services   = &service.Services{
+			Log: logService,
 		}
 	)
 
-	if isApiEnable := config.APIServer.IsEnable; isApiEnable {
+	var (
+		postUsecase    = usecase.NewPostUsecase(repositories, services, logger)
+		postLogUsecase = usecase.NewPostLogUsecase(repositories, services, logger)
+		usecases       = &usecase.Usecase{
+			Post:    postUsecase,
+			PostLog: postLogUsecase,
+		}
+	)
+
+	if isApiEnable := config.APIService.IsEnable; isApiEnable {
 		apiApp := api.NewApiApplication(usecases, validator, logger, config)
 		apiApp.Start()
 	}
 
-	// if isRabbitMqEnable ?
-	// if isKafkaEnable ?
-	// if bla bla app enable
-
-	defer mongoClient.Disconnect(context.Background())
-	defer rabbitMqConnection.Connection.Close()
-	defer rabbitMqConnection.Channel.Close()
+	if isLogsWorkerEnable := config.LogsWorkerService.IsEnable; isLogsWorkerEnable {
+		workerApp := logsworker.NewWorkerApplication(rabbitMQConnection, usecases, logger, config)
+		workerApp.Start()
+	}
 }

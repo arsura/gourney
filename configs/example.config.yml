@@ -1,7 +1,6 @@
 service:
   api:
     port: "8090"
-    enable: true
 
 database:
   mongodb:
@@ -11,10 +10,11 @@ database:
       log: "log"
     collections:
       posts: "posts"
-      logs: "logs"
+      post_logs: "post_logs"
 
 broker:
   rabbitmq:
     uri: amqp://root:root@localhost:5672/
-    queues: 
-      hello: "hello"
+    exchanges:
+      logs_topic: "logs_topic"
+        

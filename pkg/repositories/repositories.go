@@ -1,5 +1,6 @@
 package repository
 
-type Repositories struct {
-	Posts PostRepositoryProvider
+type Repository struct {
+	Post    PostRepositoryProvider
+	PostLog PostLogRepositoryProvider
 }

@@ -6,14 +6,10 @@ import (
 	"go.uber.org/zap"
 )
 
-type Queues struct {
-	Hello amqp.Queue
-}
-
 type RabbitMQConnection struct {
 	Connection *amqp.Connection
 	Channel    *amqp.Channel
-	Queues     *Queues
+	Queue      *amqp.Queue
 }
 
 func NewRabbitMQConnection(logger *zap.SugaredLogger, config *config.Config) *RabbitMQConnection {
@@ -27,23 +23,21 @@ func NewRabbitMQConnection(logger *zap.SugaredLogger, config *config.Config) *Ra
 		logger.With("error", err).Panic("failed to open a channel")
 	}
 
-	helloQueue, err := ch.QueueDeclare(
-		config.RabbitMQ.Queues.Hello, // name
-		false,                        // durable
-		false,                        // delete when unused
-		false,                        // exclusive
-		false,                        // no-wait
-		nil,                          // arguments
+	err = ch.ExchangeDeclare(
+		config.RabbitMQ.Exchanges.LogsTopic,
+		"topic",
+		true,
+		false,
+		false,
+		false,
+		nil,
 	)
 	if err != nil {
-		logger.With("error", err).Panicf("failed to declare a %s queue", config.RabbitMQ.Queues.Hello)
+		logger.With("error", err).Panicf("failed to declare a %s exchange", config.RabbitMQ.Exchanges.LogsTopic)
 	}
 
 	return &RabbitMQConnection{
 		Connection: conn,
 		Channel:    ch,
-		Queues: &Queues{
-			Hello: helloQueue,
-		},
 	}
 }

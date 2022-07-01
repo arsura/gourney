@@ -1,14 +1,11 @@
-dev: 
-	nodemon --exec APP_ENV=development go run cmd/main.go --signal SIGTERM
+dev-api: 
+	nodemon --exec APP_ENV=development ENABLE_API=1 go run cmd/main.go --signal SIGTERM
 
-dev-docker:
-	docker-compose -f ./development/docker-compose.yml up -d
+dev-worker: 
+	nodemon --exec APP_ENV=development ENABLE_WORKER=1 go run cmd/main.go --signal SIGTERM
 
 dev-docker-infra:
-	docker-compose -f ./development/docker-compose.infra.yml up -d
-
-clean-docker:
-	docker rm gourney && docker image rm gourney
+	docker-compose -f ./developments/docker-compose.infra.yml up -d
 
 test:
 	go clean -testcache && go test -v ./...
