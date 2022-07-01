@@ -7,6 +7,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	POST_ID   = "post_id"
+	EVENT     = "event"
+	ACTION_AT = "action_at"
+)
+
 type PostLog struct {
 	Id        primitive.ObjectID   `json:"id" bson:"_id,omitempty"`
 	PostId    primitive.ObjectID   `json:"post_id" bson:"post_id"`

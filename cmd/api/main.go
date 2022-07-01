@@ -5,7 +5,7 @@ import (
 
 	api "github.com/arsura/gourney/cmd/api/handlers"
 	middleware "github.com/arsura/gourney/cmd/api/middlewares"
-	config "github.com/arsura/gourney/configs"
+	"github.com/arsura/gourney/config"
 	usecase "github.com/arsura/gourney/pkg/usecases"
 	validator "github.com/arsura/gourney/pkg/validator"
 	"github.com/gofiber/fiber/v2"
@@ -15,14 +15,14 @@ import (
 )
 
 type Application struct {
-	Handlers  *api.Handlers
+	Handlers  *api.Handler
 	Validator *validator.Validator
 	Logger    *zap.SugaredLogger
 	Config    *config.Config
 }
 
 func NewApiApplication(usecases *usecase.Usecase, validator *validator.Validator, logger *zap.SugaredLogger, config *config.Config) *Application {
-	handlers := &api.Handlers{
+	handlers := &api.Handler{
 		Post: api.NewPostHandler(usecases.Post, validator, logger),
 	}
 	return &Application{handlers, validator, logger, config}

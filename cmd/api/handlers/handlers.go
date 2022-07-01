@@ -1,5 +1,5 @@
 package api
 
-type Handlers struct {
+type Handler struct {
 	Post PostHandlerProvider
 }

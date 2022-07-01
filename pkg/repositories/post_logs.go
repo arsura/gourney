@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	config "github.com/arsura/gourney/configs"
+	"github.com/arsura/gourney/config"
 	model "github.com/arsura/gourney/pkg/models/mongodb"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

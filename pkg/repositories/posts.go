@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	config "github.com/arsura/gourney/configs"
+	"github.com/arsura/gourney/config"
 	model "github.com/arsura/gourney/pkg/models/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -44,7 +44,7 @@ func (r *postRepository) CreatePost(ctx context.Context, post *model.Post) (*pri
 }
 
 func (r *postRepository) FindPostById(ctx context.Context, id primitive.ObjectID) (*model.Post, error) {
-	result := r.postCollection.FindOne(ctx, bson.M{"_id": id})
+	result := r.postCollection.FindOne(ctx, bson.M{model.ID: id})
 	if result.Err() != nil {
 		return nil, result.Err()
 	}
@@ -61,11 +61,11 @@ func (r *postRepository) FindPostById(ctx context.Context, id primitive.ObjectID
 func (r *postRepository) UpdatePostById(ctx context.Context, id primitive.ObjectID, post *model.Post) (bool, error) {
 	now := time.Now()
 
-	result, err := r.postCollection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{
+	result, err := r.postCollection.UpdateOne(ctx, bson.M{model.ID: id}, bson.M{
 		"$set": bson.M{
-			"title":      post.Title,
-			"content":    post.Content,
-			"updated_at": now,
+			model.TITLE:      post.Title,
+			model.CONTENT:    post.Content,
+			model.UPDATED_AT: now,
 		},
 	})
 	if err != nil {
@@ -76,7 +76,7 @@ func (r *postRepository) UpdatePostById(ctx context.Context, id primitive.Object
 }
 
 func (r *postRepository) DeletePostById(ctx context.Context, id primitive.ObjectID) (bool, error) {
-	result, err := r.postCollection.DeleteOne(ctx, bson.M{"_id": id})
+	result, err := r.postCollection.DeleteOne(ctx, bson.M{model.ID: id})
 	if err != nil {
 		return false, err
 	}

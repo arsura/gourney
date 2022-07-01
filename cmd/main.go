@@ -5,7 +5,7 @@ import (
 
 	"github.com/arsura/gourney/cmd/api"
 	"github.com/arsura/gourney/cmd/logsworker"
-	config "github.com/arsura/gourney/configs"
+	"github.com/arsura/gourney/config"
 	adapter "github.com/arsura/gourney/pkg/adapters"
 	"github.com/arsura/gourney/pkg/logger"
 	repository "github.com/arsura/gourney/pkg/repositories"

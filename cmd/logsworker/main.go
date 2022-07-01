@@ -3,7 +3,7 @@ package logsworker
 import (
 	"time"
 
-	config "github.com/arsura/gourney/configs"
+	"github.com/arsura/gourney/config"
 	adapter "github.com/arsura/gourney/pkg/adapters"
 	"github.com/arsura/gourney/pkg/constant"
 	usecase "github.com/arsura/gourney/pkg/usecases"
@@ -72,7 +72,7 @@ func (app *Application) Start() {
 				app.Logger.With("message", msg).Info("receive message")
 				tmpMsgs = append(tmpMsgs, msg)
 				if len(tmpMsgs) >= constant.MAX_TEMP_MESSAGE_SIZE {
-					app.Logger.Info("the temporary buffer was full, write logs")
+					app.Logger.Info("the temporary buffer had reached its limit, write logs")
 					app.handler(tmpMsgs)
 					tmpMsgs = nil
 				}

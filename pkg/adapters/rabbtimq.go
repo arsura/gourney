@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	config "github.com/arsura/gourney/configs"
+	"github.com/arsura/gourney/config"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )

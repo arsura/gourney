@@ -6,6 +6,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	TITLE   = "title"
+	CONTENT = "content"
+)
+
 type Post struct {
 	Id        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Title     string             `json:"title" bson:"title"`

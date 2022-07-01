@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	config "github.com/arsura/gourney/configs"
+	"github.com/arsura/gourney/config"
 	adapter "github.com/arsura/gourney/pkg/adapters"
 	"github.com/arsura/gourney/pkg/constant"
 	model "github.com/arsura/gourney/pkg/models/mongodb"
