@@ -3,19 +3,24 @@ module github.com/arsura/gourney
 go 1.18
 
 require (
+	github.com/go-playground/assert/v2 v2.0.1
 	github.com/go-playground/locales v0.14.0
 	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/gofiber/fiber/v2 v2.34.1
 	github.com/spf13/viper v1.12.0
 	github.com/streadway/amqp v1.0.0
+	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.21.0
 )
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.0.2 // indirect
 	github.com/xdg-go/stringprep v1.0.2 // indirect

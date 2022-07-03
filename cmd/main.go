@@ -17,20 +17,24 @@ import (
 func main() {
 
 	var (
-		logger             = logger.NewLogger()
-		validator          = validator.NewValidator()
-		config             = config.NewConfig(logger)
-		mongoClient        = adapter.NewMongoDBClient(logger, config)
+		logger    = logger.NewLogger()
+		validator = validator.NewValidator()
+		config    = config.NewConfig(logger)
+
+		mongoClient      = adapter.NewMongoClient(logger, config)
+		mongoCollections = mongoClient.GetMongoCollections()
+		_                = mongoCollections.CreateIndexes()
+
 		rabbitMQConnection = adapter.NewRabbitMQConnection(logger, config)
 	)
 
-	defer mongoClient.Disconnect(context.Background())
+	defer mongoClient.Client.Disconnect(context.Background())
 	defer rabbitMQConnection.Connection.Close()
 	defer rabbitMQConnection.Channel.Close()
 
 	var (
-		postRepository    = repository.NewPostRepository(mongoClient, logger, config)
-		postLogRepository = repository.NewPostLogRepository(mongoClient, logger, config)
+		postRepository    = repository.NewPostRepository(mongoCollections, logger, config)
+		postLogRepository = repository.NewPostLogRepository(mongoCollections, logger, config)
 		repositories      = &repository.Repository{
 			Post:    postRepository,
 			PostLog: postLogRepository,

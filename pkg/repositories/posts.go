@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/arsura/gourney/config"
+	adapter "github.com/arsura/gourney/pkg/adapters"
 	model "github.com/arsura/gourney/pkg/models/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 )
 
@@ -20,14 +20,12 @@ type PostRepositoryProvider interface {
 }
 
 type postRepository struct {
-	postCollection *mongo.Collection
+	postCollection adapter.MongoCollectionProvider
 	logger         *zap.SugaredLogger
 }
 
-func NewPostRepository(db *mongo.Client, logger *zap.SugaredLogger, config *config.Config) *postRepository {
-	postCollection := db.Database(config.MongoDB.BlogDatabase.Name).Collection(config.MongoDB.BlogDatabase.Collections.Posts)
-	// You could create indexes here!
-	return &postRepository{postCollection, logger}
+func NewPostRepository(collection *adapter.MongoCollections, logger *zap.SugaredLogger, config *config.Config) *postRepository {
+	return &postRepository{collection.PostCollection, logger}
 }
 
 func (r *postRepository) CreatePost(ctx context.Context, post *model.Post) (*primitive.ObjectID, error) {

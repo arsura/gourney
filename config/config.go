@@ -1,8 +1,6 @@
 package config
 
 import (
-	"os"
-
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -57,7 +55,7 @@ type Config struct {
 }
 
 func NewConfig(logger *zap.SugaredLogger) *Config {
-	env := os.Getenv("APP_ENV")
+	// env := os.Getenv("APP_ENV")
 	viper.AutomaticEnv()
 
 	err := viper.BindEnv("service.api.enable", "ENABLE_API")
@@ -70,14 +68,18 @@ func NewConfig(logger *zap.SugaredLogger) *Config {
 		logger.With("error", err).Panic("failed to bind ENABLE_WORKER env")
 	}
 
-	switch env {
-	case "development":
-		viper.SetConfigName("local.config")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath("configs")
-	default:
-		logger.Panic("APP_ENV must not be undefined")
-	}
+	// switch env {
+	// case "development":
+	// 	viper.SetConfigName("local.config")
+	// 	viper.SetConfigType("yaml")
+	// 	viper.AddConfigPath("configs")
+	// default:
+	// 	logger.Panic("APP_ENV must not be undefined")
+	// }
+
+	viper.SetConfigName("local.config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("config")
 
 	err = viper.ReadInConfig()
 	if err != nil {

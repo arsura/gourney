@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/arsura/gourney/config"
+	adapter "github.com/arsura/gourney/pkg/adapters"
 	model "github.com/arsura/gourney/pkg/models/mongodb"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 )
 
@@ -17,14 +17,12 @@ type PostLogRepositoryProvider interface {
 }
 
 type postLogRepository struct {
-	postLogCollection *mongo.Collection
+	postLogCollection adapter.MongoCollectionProvider
 	logger            *zap.SugaredLogger
 }
 
-func NewPostLogRepository(db *mongo.Client, logger *zap.SugaredLogger, config *config.Config) *postLogRepository {
-	postLogCollection := db.Database(config.MongoDB.LogDatabase.Name).Collection(config.MongoDB.LogDatabase.Collections.PostLogs)
-	// You could create indexes here!
-	return &postLogRepository{postLogCollection, logger}
+func NewPostLogRepository(collection *adapter.MongoCollections, logger *zap.SugaredLogger, config *config.Config) *postLogRepository {
+	return &postLogRepository{collection.PostLogCollection, logger}
 }
 
 func (r *postLogRepository) CreatePostLog(ctx context.Context, postLog *model.PostLog) (*primitive.ObjectID, error) {
