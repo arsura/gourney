@@ -55,7 +55,6 @@ type Config struct {
 }
 
 func NewConfig(logger *zap.SugaredLogger) *Config {
-	// env := os.Getenv("APP_ENV")
 	viper.AutomaticEnv()
 
 	err := viper.BindEnv("service.api.enable", "ENABLE_API")
@@ -67,15 +66,6 @@ func NewConfig(logger *zap.SugaredLogger) *Config {
 	if err != nil {
 		logger.With("error", err).Panic("failed to bind ENABLE_WORKER env")
 	}
-
-	// switch env {
-	// case "development":
-	// 	viper.SetConfigName("local.config")
-	// 	viper.SetConfigType("yaml")
-	// 	viper.AddConfigPath("configs")
-	// default:
-	// 	logger.Panic("APP_ENV must not be undefined")
-	// }
 
 	viper.SetConfigName("local.config")
 	viper.SetConfigType("yaml")

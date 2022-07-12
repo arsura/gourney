@@ -46,6 +46,7 @@ func (suite *PostRepositoryTestSuite) TestCreatePostSuccess() {
 	mockId := primitive.NewObjectID()
 	suite.mockPostCollection.On("InsertOne", mock.Anything, mockPost).Return(&mongo.InsertOneResult{InsertedID: mockId}, nil)
 	result, err := suite.postRepository.CreatePost(context.Background(), mockPost)
+	suite.mockPostCollection.AssertNumberOfCalls(suite.T(), "InsertOne", 1)
 	assert.Equal(suite.T(), result, &mockId)
 	assert.Nil(suite.T(), err)
 }
@@ -60,6 +61,7 @@ func (suite *PostRepositoryTestSuite) TestCreatePostFailed() {
 	}
 	suite.mockPostCollection.On("InsertOne", mock.Anything, mockPost).Return(nil, errors.New("failed to insert one"))
 	result, err := suite.postRepository.CreatePost(context.Background(), mockPost)
+	suite.mockPostCollection.AssertNumberOfCalls(suite.T(), "InsertOne", 1)
 	assert.Nil(suite.T(), result)
 	assert.NotNil(suite.T(), err)
 }
