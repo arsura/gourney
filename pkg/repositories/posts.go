@@ -30,10 +30,13 @@ func NewPostRepository(collection *adapter.MongoCollections, logger *zap.Sugared
 
 func (r *postRepository) CreatePost(ctx context.Context, post *model.Post) (*primitive.ObjectID, error) {
 	now := time.Now()
-	post.CreatedAt = now
-	post.UpdatedAt = now
 
-	result, err := r.postCollection.InsertOne(ctx, post)
+	result, err := r.postCollection.InsertOne(ctx, &model.Post{
+		Title:     post.Title,
+		Content:   post.Content,
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
 	if err != nil {
 		return nil, err
 	}

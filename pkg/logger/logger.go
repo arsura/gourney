@@ -10,6 +10,7 @@ import (
 func NewLogger() *zap.SugaredLogger {
 	config := zap.NewProductionConfig()
 	config.EncoderConfig.TimeKey = "timestamp"
+	config.EncoderConfig.FunctionKey = "func"
 	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	logger, err := config.Build()

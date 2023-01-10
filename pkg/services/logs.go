@@ -66,6 +66,6 @@ func (s *logService) PublishPostLogEvent(ctx context.Context, event constant.Eve
 		return err
 	}
 
-	s.logger.With("message", msg, "routing_key", routingKey).Error("publish post changes event success")
+	s.logger.With("message", msg, "routing_key", routingKey).Info("publish post changes event success")
 	return nil
 }

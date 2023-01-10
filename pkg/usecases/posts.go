@@ -29,10 +29,9 @@ func NewPostUsecase(repositories *repository.Repository, services *service.Servi
 }
 
 func (u *postUsecase) CreatePost(ctx context.Context, post *model.Post) (*primitive.ObjectID, error) {
-	id, err := u.repositories.Post.CreatePost(ctx, &model.Post{
-		Title:   post.Title,
-		Content: post.Content,
-	})
+	u.logger.With("tracking_id", ctx.Value(constant.REQUEST_ID_KEY), "post", post).Info("create new post")
+
+	id, err := u.repositories.Post.CreatePost(ctx, post)
 	if err != nil {
 		u.logger.With("event", "create_post", "error", err, "tracking_id", ctx.Value(constant.REQUEST_ID_KEY)).Error("failed to create post")
 		return nil, err
