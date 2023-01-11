@@ -6,7 +6,7 @@ import (
 
 	"github.com/arsura/gourney/config"
 	adapter "github.com/arsura/gourney/pkg/adapters"
-	model "github.com/arsura/gourney/pkg/models/mongodb"
+	model "github.com/arsura/gourney/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/arsura/gourney/pkg/constant"
-	model "github.com/arsura/gourney/pkg/models/mongodb"
+	model "github.com/arsura/gourney/pkg/models"
 	service "github.com/arsura/gourney/pkg/services"
 	"github.com/streadway/amqp"
 )

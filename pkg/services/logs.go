@@ -9,7 +9,7 @@ import (
 	"github.com/arsura/gourney/config"
 	adapter "github.com/arsura/gourney/pkg/adapters"
 	"github.com/arsura/gourney/pkg/constant"
-	model "github.com/arsura/gourney/pkg/models/mongodb"
+	model "github.com/arsura/gourney/pkg/models"
 	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"

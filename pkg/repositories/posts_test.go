@@ -9,7 +9,7 @@ import (
 	"github.com/arsura/gourney/config"
 	adapter "github.com/arsura/gourney/pkg/adapters"
 	"github.com/arsura/gourney/pkg/adapters/mocks"
-	model "github.com/arsura/gourney/pkg/models/mongodb"
+	model "github.com/arsura/gourney/pkg/models"
 	repository "github.com/arsura/gourney/pkg/repositories"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/arsura/gourney/pkg/constant"
-	model "github.com/arsura/gourney/pkg/models/mongodb"
+	model "github.com/arsura/gourney/pkg/models"
 	usecase "github.com/arsura/gourney/pkg/usecases"
 	util "github.com/arsura/gourney/pkg/utils"
 	validator "github.com/arsura/gourney/pkg/validator"

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/arsura/gourney/pkg/constant"
-	model "github.com/arsura/gourney/pkg/models/mongodb"
+	model "github.com/arsura/gourney/pkg/models"
 	repository "github.com/arsura/gourney/pkg/repositories"
 	service "github.com/arsura/gourney/pkg/services"
 	"go.mongodb.org/mongo-driver/bson/primitive"

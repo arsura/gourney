@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/arsura/gourney/pkg/constant"
-	model "github.com/arsura/gourney/pkg/models/mongodb"
+	model "github.com/arsura/gourney/pkg/models"
 	repository "github.com/arsura/gourney/pkg/repositories"
 	service "github.com/arsura/gourney/pkg/services"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -84,7 +84,7 @@ func (u *postUsecase) DeletePostById(ctx context.Context, id primitive.ObjectID)
 	}
 
 	go func() {
-		err = u.services.Log.PublishPostLogEvent(ctx, constant.ACTION_UPDATE, &model.Post{Id: id})
+		err = u.services.Log.PublishPostLogEvent(ctx, constant.ACTION_DELETE, &model.Post{Id: id})
 		if err != nil {
 			u.logger.With("event", "delete_post_by_id", "error", err, "tracking_id", ctx.Value(constant.REQUEST_ID_KEY)).Error("failed to publish delete post log event")
 		}
