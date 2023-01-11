@@ -1,7 +1,22 @@
-Run the service
+Development
 ===============
+
+Run Infrastructure
+-----
 ```sh
-docker-compose up 
+make dev-docker-infra
+```
+
+Run API Service
+-----
+```sh
+make dev-api
+```
+
+Run Logging Worker Service
+-----
+```sh
+make dev-worker
 ```
 
 Tools 
