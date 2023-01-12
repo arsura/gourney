@@ -21,7 +21,7 @@ type Application struct {
 	Config    *config.Config
 }
 
-func NewApiApplication(usecases *usecase.Usecase, validator *validator.Validator, logger *zap.SugaredLogger, config *config.Config) *Application {
+func NewApiApplication(usecases *usecase.UseCase, validator *validator.Validator, logger *zap.SugaredLogger, config *config.Config) *Application {
 	handlers := &api.Handler{
 		Post: api.NewPostHandler(usecases.Post, validator, logger),
 	}

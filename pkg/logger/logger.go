@@ -7,6 +7,12 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+const (
+	DATA_FIELD        = "data"
+	ERROR_FIELD       = "error"
+	TRACKING_ID_FIELD = "tracking_id"
+)
+
 func NewLogger() *zap.SugaredLogger {
 	config := zap.NewProductionConfig()
 	config.EncoderConfig.TimeKey = "timestamp"

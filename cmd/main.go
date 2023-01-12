@@ -49,11 +49,11 @@ func main() {
 	)
 
 	var (
-		postUsecase    = usecase.NewPostUsecase(repositories, services, logger)
-		postLogUsecase = usecase.NewPostLogUsecase(repositories, services, logger)
-		usecases       = &usecase.Usecase{
-			Post:    postUsecase,
-			PostLog: postLogUsecase,
+		postUseCase    = usecase.NewPostUseCase(repositories, services, logger)
+		postLogUseCase = usecase.NewPostLogUseCase(repositories, services, logger)
+		usecases       = &usecase.UseCase{
+			Post:    postUseCase,
+			PostLog: postLogUseCase,
 		}
 	)
 

@@ -17,6 +17,7 @@ type PostRepositoryProvider interface {
 	FindPostById(ctx context.Context, id primitive.ObjectID) (*model.Post, error)
 	UpdatePostById(ctx context.Context, id primitive.ObjectID, post *model.Post) (bool, error)
 	DeletePostById(ctx context.Context, id primitive.ObjectID) (bool, error)
+	CountPostBySocialNetworkType(ctx context.Context) ([]CountPostBySocialNetworkTypeRes, error)
 }
 
 type postRepository struct {
@@ -32,10 +33,11 @@ func (r *postRepository) CreatePost(ctx context.Context, post *model.Post) (*pri
 	now := time.Now()
 
 	result, err := r.postCollection.InsertOne(ctx, &model.Post{
-		Title:     post.Title,
-		Content:   post.Content,
-		CreatedAt: now,
-		UpdatedAt: now,
+		Title:             post.Title,
+		Content:           post.Content,
+		SocialNetworkType: post.SocialNetworkType,
+		CreatedAt:         now,
+		UpdatedAt:         now,
 	})
 	if err != nil {
 		return nil, err
@@ -64,9 +66,10 @@ func (r *postRepository) UpdatePostById(ctx context.Context, id primitive.Object
 
 	result, err := r.postCollection.UpdateOne(ctx, bson.M{model.ID: id}, bson.M{
 		"$set": bson.M{
-			model.TITLE:      post.Title,
-			model.CONTENT:    post.Content,
-			model.UPDATED_AT: now,
+			model.POST_TITLE:               post.Title,
+			model.POST_CONTENT:             post.Content,
+			model.POST_SOCIAL_NETWORK_TYPE: post.SocialNetworkType,
+			model.UPDATED_AT:               now,
 		},
 	})
 	if err != nil {
@@ -83,4 +86,24 @@ func (r *postRepository) DeletePostById(ctx context.Context, id primitive.Object
 	}
 
 	return result.DeletedCount > 0, nil
+}
+
+type CountPostBySocialNetworkTypeRes struct {
+	SocialNetworkType model.PostSocialNetworkType `bson:"_id"`
+	Total             int64                       `bson:"total"`
+}
+
+func (r *postRepository) CountPostBySocialNetworkType(ctx context.Context) ([]CountPostBySocialNetworkTypeRes, error) {
+	pipeline := []bson.M{
+		{"$group": bson.M{model.ID: "$social_network_type", "total": bson.M{"$sum": 1}}},
+	}
+	cursor, err := r.postCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	results := []CountPostBySocialNetworkTypeRes{}
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+	return results, nil
 }

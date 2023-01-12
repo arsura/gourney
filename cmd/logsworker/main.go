@@ -13,12 +13,12 @@ import (
 
 type Application struct {
 	RabbitMQConnection *adapter.RabbitMQConnection
-	Usecases           *usecase.Usecase
+	UseCases           *usecase.UseCase
 	Logger             *zap.SugaredLogger
 	Config             *config.Config
 }
 
-func NewWorkerApplication(rabbitMQConnection *adapter.RabbitMQConnection, usecases *usecase.Usecase, logger *zap.SugaredLogger, config *config.Config) *Application {
+func NewWorkerApplication(rabbitMQConnection *adapter.RabbitMQConnection, usecases *usecase.UseCase, logger *zap.SugaredLogger, config *config.Config) *Application {
 	return &Application{rabbitMQConnection, usecases, logger, config}
 }
 

@@ -1,6 +1,6 @@
 package usecase
 
-type Usecase struct {
-	Post    PostUsecaseProvider
-	PostLog PostLogUsecaseProvider
+type UseCase struct {
+	Post    PostUseCaseProvider
+	PostLog PostLogUseCaseProvider
 }

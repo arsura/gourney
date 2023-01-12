@@ -14,14 +14,16 @@ import (
 )
 
 type CreatePostReqBody struct {
-	Title   string `json:"title" validate:"required"`
-	Content string `json:"content" validate:"required"`
+	Title             string                      `json:"title" validate:"required"`
+	Content           string                      `json:"content" validate:"required"`
+	SocialNetworkType model.PostSocialNetworkType `json:"social_network_type" validate:"oneof=facebook twitter"`
 }
 
 type UpdatePostReqBody struct {
-	Id      string `json:"id" validate:"required"`
-	Title   string `json:"title" validate:"required"`
-	Content string `json:"content" validate:"required"`
+	Id                    string                      `json:"id" validate:"required"`
+	Title                 string                      `json:"title" validate:"required"`
+	Content               string                      `json:"content" validate:"required"`
+	PostSocialNetworkType model.PostSocialNetworkType `json:"social_network_type" validate:"required"`
 }
 
 type PostHandlerProvider interface {
@@ -29,16 +31,17 @@ type PostHandlerProvider interface {
 	CreatePostHandler(c *fiber.Ctx) error
 	UpdatePostByIdHandler(c *fiber.Ctx) error
 	DeletePostByIdHandler(c *fiber.Ctx) error
+	CountPostBySocialNetworkTypeHandler(c *fiber.Ctx) error
 }
 
 type postHandler struct {
-	postUsecase usecase.PostUsecaseProvider
+	postUseCase usecase.PostUseCaseProvider
 	validator   *validator.Validator
 	logger      *zap.SugaredLogger
 }
 
-func NewPostHandler(postUsecase usecase.PostUsecaseProvider, validator *validator.Validator, logger *zap.SugaredLogger) *postHandler {
-	return &postHandler{postUsecase, validator, logger}
+func NewPostHandler(postUseCase usecase.PostUseCaseProvider, validator *validator.Validator, logger *zap.SugaredLogger) *postHandler {
+	return &postHandler{postUseCase, validator, logger}
 }
 
 func (h *postHandler) FindPostByIdHandler(c *fiber.Ctx) error {
@@ -54,7 +57,7 @@ func (h *postHandler) FindPostByIdHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.postUsecase.FindPostById(ctx, *id)
+	result, err := h.postUseCase.FindPostById(ctx, *id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
 			"error": "post not found",
@@ -84,9 +87,10 @@ func (h *postHandler) CreatePostHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err = h.postUsecase.CreatePost(ctx, &model.Post{
-		Title:   post.Title,
-		Content: post.Content,
+	_, err = h.postUseCase.CreatePost(ctx, &model.Post{
+		Title:             post.Title,
+		Content:           post.Content,
+		SocialNetworkType: post.SocialNetworkType,
 	})
 
 	if err != nil {
@@ -125,7 +129,7 @@ func (h *postHandler) UpdatePostByIdHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err = h.postUsecase.UpdatePostById(ctx, *id, &model.Post{
+	_, err = h.postUseCase.UpdatePostById(ctx, *id, &model.Post{
 		Title:   post.Title,
 		Content: post.Content,
 	})
@@ -152,7 +156,7 @@ func (h *postHandler) DeletePostByIdHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err = h.postUsecase.DeletePostById(ctx, *id)
+	_, err = h.postUseCase.DeletePostById(ctx, *id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
 			"error": "post not found",
@@ -160,4 +164,20 @@ func (h *postHandler) DeletePostByIdHandler(c *fiber.Ctx) error {
 
 	}
 	return c.SendStatus(fiber.StatusNoContent)
+}
+
+func (h *postHandler) CountPostBySocialNetworkTypeHandler(c *fiber.Ctx) error {
+	var (
+		requestId = c.Locals("requestid").(string)
+		ctx       = context.WithValue(c.UserContext(), constant.REQUEST_ID_KEY, requestId)
+	)
+
+	result, err := h.postUseCase.CountPostBySocialNetworkType(ctx)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+			"error": err.Error(),
+		})
+
+	}
+	return c.JSON(result)
 }

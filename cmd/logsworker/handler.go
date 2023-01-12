@@ -45,7 +45,7 @@ func (app *Application) handler(msgs []amqp.Delivery) {
 				}
 				postLogs = append(postLogs, postLog)
 			}
-			app.Usecases.PostLog.CreatePostLogs(context.Background(), postLogs)
+			app.UseCases.PostLog.CreatePostLogs(context.Background(), postLogs)
 		default:
 		}
 	}
