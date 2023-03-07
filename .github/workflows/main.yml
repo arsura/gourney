@@ -9,4 +9,4 @@ jobs:
     steps:
     - name: Use variables
       run: |
-        echo "repository variable : ${{ vars.TEST }}"
+        echo "repository variable : ${{ secrets.PUBLIC_SECRET }}"
