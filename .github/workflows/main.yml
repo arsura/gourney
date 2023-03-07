@@ -1,13 +1,11 @@
 on:
   workflow_dispatch:
-env:
-  # Setting an environment variable with the value of a configuration variable
-  env_var: production
 
 jobs:
   display-variables:
     name: "Hi"
     runs-on: ubuntu-latest
+    environment: production
     steps:
     - name: Use variables
       run: |
