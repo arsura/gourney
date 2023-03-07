@@ -1,0 +1,14 @@
+on:
+  workflow_dispatch:
+env:
+  # Setting an environment variable with the value of a configuration variable
+  env_var: production
+
+jobs:
+  display-variables:
+    name: "Hi"
+    runs-on: "OnRaiWa"
+    steps:
+    - name: Use variables
+      run: |
+        echo "repository variable : ${{ vars.TEST }}"
