@@ -20,3 +20,4 @@ config/local.config.yml
 developments/mongo-data/
 .env
 .vscode
+.idea
